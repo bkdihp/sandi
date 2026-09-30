@@ -1,85 +1,42 @@
 # kode.in
- Android based application build to help scouts convert text into *Morse code* in seconds! This application build with Android Studio.
- 
- [![forthebadge](https://forthebadge.com/images/badges/built-for-android.svg)](https://forthebadge.com) [![forthebadge](https://forthebadge.com/images/badges/built-by-developers.svg)](https://forthebadge.com)<br>
- [![Generic badge](https://img.shields.io/badge/MAINTENANCING-YES-success.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/contributor-3-blue.svg)](https://shields.io/)
- 
-## NOTES
- **Do not publish this apps without my permission or try to claim this apps is yours!!!** <br>
- **that will broke my heart :(**
 
-## Table of Contents
-* [Features](#features)
-* [Screenshoots](#screenshoots)
-* [Technology Stack](#technology-stack)
-* [Development Setup](#development-setup)
-* [Structure Directory](#structure-directory)
-* [Authors](#authors)
-* [Contributors](#contibutors)
-* [License](#license)
-* [Acknowledgments](#acknowledgments)
+Aplikasi berbasis web untuk memudahkan para pandu/Pramuka menerjemahkan teks ke dalam berbagai sandi Pramuka (*Morse*, *Rumput*, *Kotak*, dan *Semafor*). Ditulis ulang dari aplikasi Android aslinya menjadi aplikasi modern berbasis **React + TypeScript + Tailwind CSS**.
 
-## Features
-Here's the the features of this apps :
-- [x] Convert to morse-code
-- [x] Convert to grass-code
-- [x] Convert to square-code
-- [x] Convert to semaphore-code
-- [x] allow to copy the result text
+## Fitur Utama
 
-## Screenshoots
-here's the screenshoot of the apps that I made, hope you like it
+- **Sandi Morse**: Menerjemahkan alfabet dan angka ke kode titik dan garis Morse, lengkap dengan pemutar audio beeper frekuensi 650Hz.
+- **Sandi Rumput**: Konversi ke visual sandi rumput autentik menggunakan font kustom `@font/sandi_rumput`.
+- **Sandi Kotak**: Konversi ke lambang sandi kotak (Pigpen cipher) menggunakan font kustom `@font/sandi_kotak`.
+- **Sandi Semafor**: Konversi visual sandi bendera semaphore menggunakan font kustom `@font/semapore`.
+- **Salin Hasil**: Tombol satu-klik untuk menyalin kode hasil terjemahan ke clipboard.
+- **Panduan Sandi**: Informasi dan contekan referensi dasar sandi Pramuka.
+- **Halaman Credit**: Profil pembuat asli aplikasi.
 
-**Dashboard :**<br><br>
-<img src="screenshoot/mockup/home.png" width="300px" /><br>
+## Teknologi
 
-**Features :**<br><br>
-<img src="screenshoot/mockup/menu1.png" width="300px" /> <img src="screenshoot/mockup/menu2.png" width="300px" /> <img src="screenshoot/mockup/menu3.png" width="300px" /> <img src="screenshoot/mockup/menu4.png" width="300px" />
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
+- **Ikon**: Lucide React
+- **Audio**: Web Audio API oscillator
+- **Font Asli**: Poppins, Sandi Kotak, Sandi Rumput, Sandi Semafor
 
-**Credit Page :**<br><br>
-<img src="screenshoot/mockup/about.png" width="300px" /><br>
+## Cara Menjalankan
 
-## Technology Stack
-* Programming Language : Java
-* IDE: Android Studio https://developer.android.com/studio/
-* Another Stack: Card View
-
-## Development Setup
-To start this *development project*, make sure you have installed `Android Studio` and `Android sdk`. To start this project:
-- Run Android Studio
-- Choose Import project from version control
-- Input link respository Bitbucket: https://github.com/rbayuokt/kode.in
-
-If it goes well, the project will be able to open in Android Studio and it can be build.
-Make sure you read this `README.md`
-
-## Structure Directory
-Struktor folder sangat penting untuk diketahui agar tim mengatahui fungsi-fungsi tiap-tiap folder tujuannya agar memiliki persepsi yang sama. Berikut merupakan struktur folder dari project ini:
-skeleton
 ```bash
-├── kode.id
-│   ├── src
-│   │   ├──  main
-│   │   |    |──  java
-│   │   |    |──  res
+# Instalasi dependencies
+npm install
+
+# Menjalankan development server (port 3000)
+npm run dev
+
+# Membangun versi produksi
+npm run build
 ```
 
-The explanation of the above folders is as follows:
-- **java** is folder which is used to store java files.
-- **res** is folder that is used to store assets such as layout, fonts, images, and others.
+## Penulis & Kredit
 
-## Authors
-* **Rizky Bayu Oktavian** - *kode.in developer* - [@rbayuokt](https://www.instagram.com/rbayuokt/)
-* made with :heart: in Cimahi
+- **Rizky Bayu Oktavian** - *Pembuat asli kode.in* - [@rbayuokt](https://www.instagram.com/rbayuokt/)
+- Dibuat dengan ♥ di Cimahi
 
-## Contibutors
-* **Fladio Armandika** - *Contributor* - [FladioArmandika](https://github.com/FladioArmandika)
-* **Nenza Nurfirmansyah** - *Contributor* - [nenzan](https://github.com/nenzan)
+## Lisensi
 
-## License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details
-
-## Acknowledgments
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+Proyek ini berada di bawah lisensi MIT - lihat file [LICENSE](LICENSE) untuk informasi lebih lanjut.

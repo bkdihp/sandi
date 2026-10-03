@@ -12,7 +12,7 @@ import {
   BenderaSemaforIcon,
   BukuSakuIcon,
 } from './components/ScoutIcons';
-import { Info, Gamepad2, Maximize2, Share2, QrCode } from 'lucide-react';
+import { Info, Gamepad2, Maximize2, Share2 } from 'lucide-react';
 import { InteractiveMediaArena } from './components/InteractiveMediaArena';
 import { PWAInstallButton } from './components/PWAInstallButton';
 import { SocialShareModal } from './components/SocialShareModal';

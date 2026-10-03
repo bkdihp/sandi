@@ -159,15 +159,6 @@ export const App: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsShareModalOpen(true)}
-              className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center cursor-pointer"
-              title="QR Code URL Aktif"
-            >
-              <QrCode className="w-4 h-4 text-stone-700" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsShareModalOpen(true)}
               className="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300/80 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
               title="Bagikan Aplikasi ke Media Sosial"
             >

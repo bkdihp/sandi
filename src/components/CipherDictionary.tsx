@@ -8,6 +8,7 @@ import {
   BenderaSemaforIcon,
   BukuSakuIcon,
 } from './ScoutIcons';
+import { SemaphoreFigure } from './SemaphoreFigure';
 
 export type SupportedCipher = 'morse' | 'rumput' | 'kotak' | 'semafor';
 
@@ -286,12 +287,12 @@ export const CipherDictionary: React.FC<CipherDictionaryProps> = ({
                         {isPlayingMorse ? (
                           <>
                             <VolumeX className="w-3.5 h-3.5" />
-                            <span>Hentikan</span>
+                            <span>Henti</span>
                           </>
                         ) : (
                           <>
                             <Volume2 className="w-3.5 h-3.5 text-amber-800" />
-                            <span>Bunyikan</span>
+                            <span>Bunyi</span>
                           </>
                         )}
                       </button>
@@ -363,10 +364,13 @@ export const CipherDictionary: React.FC<CipherDictionaryProps> = ({
                     </div>
                     <span className="text-[11px] text-stone-400 font-medium">{activeItem.semaforDesc}</span>
                   </div>
-                  <div className="mt-1 px-3 py-1 bg-rose-50/40 rounded-lg border border-rose-100 flex items-center justify-between">
-                    <span className="font-sandi-semafor text-4xl text-stone-900 leading-none">
-                      {activeItem.char.toLowerCase()}
-                    </span>
+                  <div className="mt-1 px-3 py-1.5 bg-rose-50/40 rounded-lg border border-rose-100 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <SemaphoreFigure char={activeItem.char} size={60} showLabel={false} />
+                      <span className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-white text-stone-800 border border-stone-200">
+                        {activeItem.char}
+                      </span>
+                    </div>
                     <span className="text-[11px] text-stone-500 font-sans text-right max-w-[190px]">
                       {activeItem.semaforDesc}
                     </span>
@@ -378,7 +382,7 @@ export const CipherDictionary: React.FC<CipherDictionaryProps> = ({
             {/* Seamless Action Footer: Buka di Translator */}
             <div className="mt-4 pt-3.5 border-t border-stone-200 space-y-2">
               <div className="flex items-center justify-between text-xs text-stone-500 font-medium">
-                <span>Pilih Tujuan Translator:</span>
+                <span>Tujuan:</span>
                 <div className="flex items-center gap-1">
                   {(['morse', 'rumput', 'kotak', 'semafor'] as SupportedCipher[]).map((c) => (
                     <button
@@ -402,7 +406,7 @@ export const CipherDictionary: React.FC<CipherDictionaryProps> = ({
                 onClick={() => handleApplyToTranslator(targetCipher)}
                 className="w-full py-2.5 px-3 rounded-xl bg-amber-800 hover:bg-amber-900 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer active:scale-98"
               >
-                <span>Gunakan &quot;{activeItem.char}&quot; di Translator</span>
+                <span>Gunakan</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>

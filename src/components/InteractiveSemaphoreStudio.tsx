@@ -92,7 +92,7 @@ export const InteractiveSemaphoreStudio: React.FC = () => {
             title="Ubah sudut pandang depan/belakang"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>{viewPerspective === 'front' ? 'Tampak Depan' : 'Tampak Belakang'}</span>
+            <span>{viewPerspective === 'front' ? 'Depan' : 'Belakang'}</span>
           </button>
 
           {/* Mode Switcher */}
@@ -116,7 +116,7 @@ export const InteractiveSemaphoreStudio: React.FC = () => {
                 : 'bg-stone-800 text-stone-300 hover:text-white'
             }`}
           >
-            Kuis Tebak {quizMode && `(${quizScore})`}
+            Kuis {quizMode && `(${quizScore})`}
           </button>
         </div>
       </div>

@@ -14,10 +14,10 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({ onBack }) => {
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-2 text-xs font-semibold text-stone-600 hover:text-stone-900 transition-colors py-1 px-2.5 -ml-2.5 rounded-lg hover:bg-stone-100"
+          className="flex items-center gap-2 text-xs font-semibold text-stone-600 hover:text-stone-900 transition-colors py-1 px-2.5 -ml-2.5 rounded-lg hover:bg-stone-100 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Kembali ke Beranda</span>
+          <span>Kembali</span>
         </button>
 
         <div className="flex items-center gap-1.5 text-xs text-stone-400 font-mono">
@@ -102,9 +102,10 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({ onBack }) => {
       <button
         type="button"
         onClick={onBack}
-        className="w-full py-3 px-4 rounded-xl bg-amber-800 hover:bg-amber-900 text-white text-xs sm:text-sm font-bold shadow-sm transition-all"
+        className="w-full py-3 px-4 rounded-xl bg-amber-800 hover:bg-amber-900 text-white text-xs sm:text-sm font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
       >
-        Kembali ke Modul Sandi
+        <ArrowLeft className="w-4 h-4" />
+        <span>Kembali</span>
       </button>
     </div>
   );

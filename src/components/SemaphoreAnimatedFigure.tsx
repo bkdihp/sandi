@@ -220,7 +220,7 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
             title={isLooping ? 'Putar Berulang: Aktif (Loop terus menerus)' : 'Putar 1 Kali (Berhenti di huruf terakhir)'}
           >
             {isLooping ? <Repeat className="w-3.5 h-3.5 text-amber-400" /> : <Repeat1 className="w-3.5 h-3.5 text-stone-400" />}
-            <span>{isLooping ? 'Loop: Aktif' : 'Loop: Mati (1x)'}</span>
+            <span>{isLooping ? 'Ulang' : 'Sekali'}</span>
           </button>
 
           {/* Flip Perspective Button */}
@@ -235,7 +235,7 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
             title="Ubah sudut pandang depan/belakang"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>{viewPerspective === 'front' ? 'Tampak Depan' : 'Tampak Belakang'}</span>
+            <span>{viewPerspective === 'front' ? 'Depan' : 'Belakang'}</span>
           </button>
 
           {/* Speed Presets */}
@@ -584,7 +584,7 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
               ) : (
                 <>
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>{isAtLastCharacter && !isLooping ? 'Putar dari Awal' : 'Putar Gerakan'}</span>
+                  <span>Putar</span>
                 </>
               )}
             </button>

@@ -223,7 +223,7 @@ export const ClassroomCipherDuel: React.FC = () => {
             onClick={resetGame}
             className="px-8 py-4 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl text-lg font-black shadow-xl hover:shadow-2xl transition-all cursor-pointer"
           >
-            Mainkan Babak Baru
+            Ulang
           </button>
         </div>
       ) : (

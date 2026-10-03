@@ -30,7 +30,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
           className={`px-5 py-3 rounded-2xl bg-amber-600 hover:bg-amber-500 active:scale-95 text-white text-xs sm:text-sm font-black shadow-lg transition-all flex items-center gap-2 cursor-pointer ${className}`}
         >
           <Download className="w-4 h-4" />
-          <span>Pasang Aplikasi (PWA)</span>
+          <span>Pasang</span>
         </button>
       );
     }
@@ -43,7 +43,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
         title="Pasang aplikasi ke layar utama (PWA / TWA)"
       >
         <Smartphone className="w-3.5 h-3.5 text-amber-800" />
-        <span className="hidden sm:inline">Pasang App</span>
+        <span className="hidden sm:inline">Pasang</span>
       </button>
     );
   }
@@ -59,7 +59,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
           title="Pasang aplikasi di iPhone / iPad"
         >
           <Smartphone className="w-3.5 h-3.5 text-amber-800" />
-          <span className="hidden sm:inline">Pasang App</span>
+          <span className="hidden sm:inline">Pasang</span>
         </button>
 
         {showIOSGuide && (

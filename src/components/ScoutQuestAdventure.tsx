@@ -536,7 +536,7 @@ export const ScoutQuestAdventure: React.FC = () => {
             className="flex items-center gap-2 text-stone-600 hover:text-stone-900 font-bold text-sm bg-stone-100 hover:bg-stone-200 px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Peta Level</span>
+            <span>Peta</span>
           </button>
 
           <div className="text-center">
@@ -616,7 +616,7 @@ export const ScoutQuestAdventure: React.FC = () => {
                 className="px-5 py-3 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm transition-colors flex items-center gap-2 cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>Ulangi Level</span>
+                <span>Ulang</span>
               </button>
               {activeLevelId < SCOUT_LEVELS.length && (
                 <button
@@ -624,7 +624,7 @@ export const ScoutQuestAdventure: React.FC = () => {
                   onClick={() => startLevel(activeLevelId + 1)}
                   className="px-7 py-3 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white font-black text-sm shadow-lg hover:shadow-xl transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  <span>Lanjut Level {activeLevelId + 1}</span>
+                  <span>Lanjut</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               )}
@@ -633,7 +633,7 @@ export const ScoutQuestAdventure: React.FC = () => {
                 onClick={handleBackToMap}
                 className="px-5 py-3 rounded-2xl bg-stone-800 hover:bg-stone-900 text-white font-bold text-sm transition-colors cursor-pointer"
               >
-                Peta Petualangan
+                Peta
               </button>
             </div>
           </div>
@@ -804,7 +804,7 @@ export const ScoutQuestAdventure: React.FC = () => {
                       : 'bg-stone-200 text-stone-400 cursor-not-allowed'
                   }`}
                 >
-                  Periksa Jawaban
+                  Periksa
                 </button>
               ) : (
                 <button
@@ -814,8 +814,8 @@ export const ScoutQuestAdventure: React.FC = () => {
                 >
                   <span>
                     {currentQIdx + 1 < currentLevel.questions.length
-                      ? 'Soal Berikutnya'
-                      : 'Lihat Hasil Akhir'}
+                      ? 'Lanjut'
+                      : 'Hasil'}
                   </span>
                   <ChevronRight className="w-4 h-4" />
                 </button>

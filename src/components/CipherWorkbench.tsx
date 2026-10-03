@@ -10,6 +10,7 @@ import {
   ZoomIn,
   Square,
   Delete,
+  Download,
 } from 'lucide-react';
 import {
   convertToMorse,
@@ -25,6 +26,12 @@ import {
   BenderaSemaforIcon,
 } from './ScoutIcons';
 import { SemaphoreAnimatedFigure } from './SemaphoreAnimatedFigure';
+import { SemaphoreTextDisplay } from './SemaphoreTextDisplay';
+import {
+  copyCipherSmart,
+  renderCipherToCanvas,
+  downloadCanvasAsPng,
+} from '../utils/cipherImageExporter';
 
 export type CipherType = 'morse' | 'rumput' | 'kotak' | 'semafor';
 
@@ -237,11 +244,39 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
     playerRef.current.preview(whistleSound, audioSpeedWpm);
   };
 
-  const handleCopy = () => {
+  const [isCopying, setIsCopying] = useState(false);
+
+  const handleCopy = async () => {
+    if (!outputResult || isCopying) return;
+    setIsCopying(true);
+    try {
+      await copyCipherSmart({
+        type,
+        text: inputText,
+        outputResult,
+      });
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+        setIsCopying(false);
+      }, 2000);
+    } catch {
+      setIsCopying(false);
+    }
+  };
+
+  const handleDownloadImage = async () => {
     if (!outputResult) return;
-    navigator.clipboard.writeText(outputResult);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
+    try {
+      const canvas = await renderCipherToCanvas({
+        type,
+        text: inputText,
+        outputResult,
+      });
+      downloadCanvasAsPng(canvas, `sandi-${type}-${Date.now()}.png`);
+    } catch (err) {
+      console.error('Download gambar sandi gagal:', err);
+    }
   };
 
   const handleClear = () => {
@@ -315,7 +350,7 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                 title="Papan Ketik Layar"
               >
                 <Keyboard className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Papan Ketik</span>
+                <span className="hidden sm:inline">Ketik</span>
               </button>
 
               <button
@@ -354,7 +389,7 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                     : 'text-stone-600 hover:text-stone-900'
                 }`}
               >
-                Teks &rarr; Morse
+                Teks
               </button>
               <button
                 type="button"
@@ -368,7 +403,7 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                     : 'text-stone-600 hover:text-stone-900'
                 }`}
               >
-                Morse &rarr; Teks
+                Morse
               </button>
             </div>
           </div>
@@ -601,7 +636,7 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                 className="text-amber-800 hover:text-amber-950 font-semibold text-xs flex items-center gap-1.5 cursor-pointer"
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>Buku Saku Sandi</span>
+                <span>Kamus</span>
               </button>
             </div>
           </div>
@@ -617,24 +652,42 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                   Hasil Terjemahan
                 </span>
 
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium flex items-center gap-1.5 transition-colors border border-stone-200/60 cursor-pointer"
-                  title="Salin Hasil"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Tersalin</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Salin</span>
-                    </>
-                  )}
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handleDownloadImage}
+                    disabled={!outputResult}
+                    className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium flex items-center gap-1.5 transition-colors border border-stone-200/60 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    title="Unduh sebagai Gambar PNG"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Unduh</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    disabled={!outputResult || isCopying}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors border cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                      copied
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                        : 'bg-stone-100 hover:bg-stone-200 text-stone-700 border-stone-200/60'
+                    }`}
+                    title={type === 'morse' ? 'Salin Kode Morse' : 'Salin Sandi sebagai Gambar PNG'}
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Tersalin</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Salin</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* MORSE ONLY: Single Ergonomic Audio Deck (Hidden for Rumput, Kotak, Semafor) */}
@@ -658,15 +711,19 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                         {isPlayingAudio ? (
                           <>
                             <Square className="w-3.5 h-3.5 fill-current shrink-0" />
-                            <span>Hentikan</span>
+                            <span>Henti</span>
                           </>
                         ) : (
                           <>
                             <Volume2 className="w-3.5 h-3.5 shrink-0" />
-                            <span>Bunyikan ({audioSpeedWpm} WPM)</span>
+                            <span>Bunyi</span>
                           </>
                         )}
                       </button>
+
+                      <span className="text-[11px] font-mono font-semibold text-stone-500 bg-stone-200/70 px-2 py-0.5 rounded">
+                        {audioSpeedWpm} WPM
+                      </span>
 
                       {isPlayingAudio && (
                         <span className="text-[11px] font-mono font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
@@ -682,7 +739,7 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                         className="px-2 py-1 rounded-md bg-white hover:bg-stone-100 text-stone-700 text-xs font-medium border border-stone-200 cursor-pointer"
                         title="Dengar sampel nada"
                       >
-                        Coba Nada
+                        Uji
                       </button>
 
                       <button
@@ -818,16 +875,10 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                       </div>
                     )}
 
-                    {/* Sandi Semafor Display */}
+                    {/* Sandi Semafor Display (Using Authentic Simulator Scout Model) */}
                     {type === 'semafor' && (
-                      <div
-                        className={`font-sandi-semafor text-stone-900 break-words leading-normal select-all tracking-[0.35em] transition-all ${
-                          isJumboScale
-                            ? 'text-7xl sm:text-8xl'
-                            : 'text-5xl sm:text-6xl'
-                        }`}
-                      >
-                        {outputResult}
+                      <div className="w-full">
+                        <SemaphoreTextDisplay text={inputText} isJumbo={isJumboScale} />
                       </div>
                     )}
                   </div>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { X, Copy, Check, Share2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Copy, Check, Share2, QrCode, Download, Link2 } from 'lucide-react';
+import QRCode from 'qrcode';
 import { SandiAppLogo } from './ScoutIcons';
 
 interface SocialShareModalProps {
@@ -9,20 +10,66 @@ interface SocialShareModalProps {
 
 export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onClose }) => {
   const [copied, setCopied] = useState(false);
+  const [qrCopied, setQrCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<'qr' | 'link' | 'media'>('qr');
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+
+  // Dynamically get the CURRENT active URL (including hash and query)
+  const activeUrl = typeof window !== 'undefined' ? window.location.href : 'https://sandi-pramuka.web.app';
+
+  useEffect(() => {
+    if (isOpen && activeUrl) {
+      QRCode.toDataURL(activeUrl, {
+        width: 480,
+        margin: 2,
+        errorCorrectionLevel: 'M',
+        color: {
+          dark: '#1C1917',
+          light: '#FFFFFF',
+        },
+      })
+        .then((url) => setQrCodeDataUrl(url))
+        .catch((err) => console.error('Gagal membuat QR Code:', err));
+    }
+  }, [isOpen, activeUrl]);
 
   if (!isOpen) return null;
 
-  const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://sandi-pramuka.web.app';
-  const shareTitle = 'Sandi — Aplikasi Kriptografi & Sandi Pramuka Interaktif';
+  const shareTitle = 'Sandi — Kriptografi & Telegrafi Sandi Pramuka';
   const shareText =
-    'Yuk belajar dan pecahkan sandi Pramuka (Morse, Rumput, Kotak, Semafor) dengan aplikasi Sandi! Lengkap dengan peluit morse dan game seru:';
-
-  const fullShareMessage = `${shareText}\n${appUrl}`;
+    'Yuk belajar dan pecahkan sandi Pramuka (Morse, Rumput, Kotak, Semafor) dengan aplikasi Sandi! Lengkap dengan simulasi bendera dan audio peluit:';
+  const fullShareMessage = `${shareText}\n${activeUrl}`;
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(fullShareMessage);
+    navigator.clipboard.writeText(activeUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadQr = () => {
+    if (!qrCodeDataUrl) return;
+    const a = document.createElement('a');
+    a.href = qrCodeDataUrl;
+    a.download = 'sandi-pramuka-qr.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const handleCopyQrImage = async () => {
+    if (!qrCodeDataUrl) return;
+    try {
+      const res = await fetch(qrCodeDataUrl);
+      const blob = await res.blob();
+      if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
+        const item = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([item]);
+        setQrCopied(true);
+        setTimeout(() => setQrCopied(false), 2000);
+      }
+    } catch {
+      handleCopyLink();
+    }
   };
 
   const handleNativeShare = async () => {
@@ -31,7 +78,7 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
         await navigator.share({
           title: shareTitle,
           text: shareText,
-          url: appUrl,
+          url: activeUrl,
         });
       } catch {
         // User cancelled share
@@ -60,17 +107,17 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
           <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.197 1.006.128.832.942z"/>
         </svg>
       ),
-      url: `https://t.me/share/url?url=${encodeURIComponent(appUrl)}&text=${encodeURIComponent(shareText)}`,
+      url: `https://t.me/share/url?url=${encodeURIComponent(activeUrl)}&text=${encodeURIComponent(shareText)}`,
     },
     {
-      name: 'Twitter / X',
+      name: 'X',
       color: 'bg-stone-900 hover:bg-black text-white',
       icon: (
         <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
         </svg>
       ),
-      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(appUrl)}`,
+      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(activeUrl)}`,
     },
     {
       name: 'Facebook',
@@ -80,64 +127,165 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
           <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
         </svg>
       ),
-      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(appUrl)}`,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(activeUrl)}`,
     },
   ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/70 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-stone-200 animate-scaleUp">
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-stone-200 animate-scaleUp">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-stone-100 flex items-center justify-between bg-stone-50/80">
-          <div className="flex items-center gap-3">
-            <SandiAppLogo className="w-8 h-8" />
-            <div>
-              <h3 className="text-base font-bold text-stone-900 tracking-tight">
-                Bagikan Aplikasi Sandi
-              </h3>
-              <p className="text-xs text-stone-500">
-                Ajak regu dan gugus depan belajar sandi bersama
-              </p>
-            </div>
+          <div className="flex items-center gap-2.5">
+            <SandiAppLogo className="w-7 h-7" />
+            <h3 className="text-base font-bold text-stone-900 tracking-tight">
+              Bagikan
+            </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-200/70 flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-200/70 flex items-center justify-center transition-colors cursor-pointer"
+            title="Tutup"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Tab Controls (Single-word buttons) */}
+        <div className="flex items-center border-b border-stone-200 px-4 pt-3 gap-2 bg-stone-50/40">
+          <button
+            type="button"
+            onClick={() => setActiveTab('qr')}
+            className={`pb-2.5 px-3 text-xs font-bold transition-all flex items-center gap-1.5 border-b-2 cursor-pointer ${
+              activeTab === 'qr'
+                ? 'border-amber-800 text-amber-900'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>Kode</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('link')}
+            className={`pb-2.5 px-3 text-xs font-bold transition-all flex items-center gap-1.5 border-b-2 cursor-pointer ${
+              activeTab === 'link'
+                ? 'border-amber-800 text-amber-900'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <Link2 className="w-3.5 h-3.5" />
+            <span>Tautan</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('media')}
+            className={`pb-2.5 px-3 text-xs font-bold transition-all flex items-center gap-1.5 border-b-2 cursor-pointer ${
+              activeTab === 'media'
+                ? 'border-amber-800 text-amber-900'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span>Kanal</span>
           </button>
         </div>
 
         {/* Body Content */}
-        <div className="p-5 sm:p-6 space-y-4">
-          {/* Social Share Card Preview with combined Peluit + Tunas Kelapa logo */}
-          <div className="rounded-2xl overflow-hidden border border-stone-200/80 shadow-xs relative group bg-stone-900 text-white">
-            <img
-              src="/og-image.png"
-              alt="Preview Berbagi Aplikasi Sandi"
-              className="w-full aspect-[1200/630] object-cover"
-            />
-            <div className="p-3 bg-stone-900 flex items-center justify-between">
-              <div>
-                <span className="text-xs font-bold text-amber-400 block">
-                  Sandi — Kriptografi &amp; Telegrafi Lapangan
-                </span>
-                <span className="text-[11px] text-stone-400">
-                  Gerakan Pramuka Indonesia
-                </span>
+        <div className="p-5 space-y-4">
+          {/* TAB 1: QR CODE */}
+          {activeTab === 'qr' && (
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="p-3 bg-white rounded-2xl border-2 border-stone-200 shadow-xs relative group">
+                {qrCodeDataUrl ? (
+                  <img
+                    src={qrCodeDataUrl}
+                    alt="QR Code URL Aktif Sandi"
+                    className="w-52 h-52 object-contain rounded-lg"
+                  />
+                ) : (
+                  <div className="w-52 h-52 flex items-center justify-center text-xs text-stone-400">
+                    Membuat...
+                  </div>
+                )}
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-800 text-stone-300 border border-stone-700">
-                PWA / TWA Ready
-              </span>
-            </div>
-          </div>
 
-          {/* Social Channels Buttons */}
-          <div className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 block">
-              Bagikan ke Media Sosial:
-            </span>
+              <div className="w-full bg-stone-50 rounded-xl p-2.5 border border-stone-200 text-left">
+                <span className="text-[10px] font-mono text-stone-400 block uppercase font-bold">
+                  URL Aktif:
+                </span>
+                <p className="text-xs font-mono text-stone-700 truncate mt-0.5 select-all">
+                  {activeUrl}
+                </p>
+              </div>
+
+              {/* QR Action Buttons */}
+              <div className="w-full grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleDownloadQr}
+                  className="py-2.5 px-3 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+                  title="Unduh gambar QR Code"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Unduh</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCopyQrImage}
+                  className="py-2.5 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-all border border-stone-300 shadow-2xs cursor-pointer active:scale-95"
+                  title="Salin QR Code ke Clipboard"
+                >
+                  {qrCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{qrCopied ? 'Tersalin' : 'Salin'}</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: LINK & DIRECT COPY */}
+          {activeTab === 'link' && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 bg-stone-100 rounded-xl p-1.5 border border-stone-200">
+                <input
+                  type="text"
+                  readOnly
+                  value={activeUrl}
+                  className="flex-1 bg-transparent px-2 text-xs font-mono text-stone-700 outline-none select-all"
+                />
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    copied
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-amber-800 hover:bg-amber-900 text-white shadow-xs'
+                  }`}
+                >
+                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copied ? 'Tersalin' : 'Salin'}</span>
+                </button>
+              </div>
+
+              {typeof navigator !== 'undefined' && 'share' in navigator && (
+                <button
+                  type="button"
+                  onClick={handleNativeShare}
+                  className="w-full py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-98"
+                >
+                  <Share2 className="w-4 h-4 text-amber-400" />
+                  <span>Bagikan</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: MEDIA CHANNELS */}
+          {activeTab === 'media' && (
             <div className="grid grid-cols-2 gap-2.5">
               {shareChannels.map((channel) => (
                 <a
@@ -152,42 +300,7 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
                 </a>
               ))}
             </div>
-          </div>
-
-          {/* Direct Copy Link & Native Share Bar */}
-          <div className="pt-2 border-t border-stone-100 space-y-2">
-            <div className="flex items-center gap-2 bg-stone-100 rounded-xl p-1.5 border border-stone-200">
-              <input
-                type="text"
-                readOnly
-                value={appUrl}
-                className="flex-1 bg-transparent px-2 text-xs font-mono text-stone-700 outline-none select-all"
-              />
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                  copied
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'bg-amber-800 hover:bg-amber-900 text-white shadow-xs'
-                }`}
-              >
-                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Tersalin!' : 'Salin'}</span>
-              </button>
-            </div>
-
-            {typeof navigator !== 'undefined' && 'share' in navigator && (
-              <button
-                type="button"
-                onClick={handleNativeShare}
-                className="w-full py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-98"
-              >
-                <Share2 className="w-4 h-4 text-amber-400" />
-                <span>Buka Opsi Berbagi Sistem (Android / iOS)</span>
-              </button>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>

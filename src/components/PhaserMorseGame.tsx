@@ -476,13 +476,13 @@ export const PhaserMorseGame: React.FC<PhaserMorseGameProps> = () => {
                 setLevel('siaga');
                 resetGame();
               }}
-              className={`flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all ${
+              className={`flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
                 level === 'siaga'
                   ? 'bg-amber-600 text-white shadow-md'
                   : 'text-stone-400 hover:text-white'
               }`}
             >
-              Tingkat Siaga (Dasar)
+              Siaga
             </button>
             <button
               type="button"
@@ -490,13 +490,13 @@ export const PhaserMorseGame: React.FC<PhaserMorseGameProps> = () => {
                 setLevel('penggalang');
                 resetGame();
               }}
-              className={`flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all ${
+              className={`flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
                 level === 'penggalang'
                   ? 'bg-amber-600 text-white shadow-md'
                   : 'text-stone-400 hover:text-white'
               }`}
             >
-              Tingkat Penggalang (Lanjut)
+              Penggalang
             </button>
           </div>
 

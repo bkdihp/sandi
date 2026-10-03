@@ -45,7 +45,7 @@ export const InteractiveMediaArena: React.FC<InteractiveMediaArenaProps> = ({
             className="p-3 bg-stone-800 hover:bg-stone-700 active:scale-95 text-stone-200 rounded-2xl border border-stone-700 transition-all flex items-center gap-2 cursor-pointer text-xs font-bold"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Kembali ke Beranda</span>
+            <span className="hidden sm:inline">Kembali</span>
           </button>
 
           <div>
@@ -72,7 +72,7 @@ export const InteractiveMediaArena: React.FC<InteractiveMediaArenaProps> = ({
             title="Tampilkan Layar Penuh"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            <span>{isFullscreen ? 'Kecilkan Layar' : 'Layar Penuh'}</span>
+            <span>{isFullscreen ? 'Kecil' : 'Layar'}</span>
           </button>
         </div>
       </div>
@@ -111,7 +111,7 @@ export const InteractiveMediaArena: React.FC<InteractiveMediaArenaProps> = ({
                 activeTab === 'misi' ? 'text-white' : 'text-stone-900'
               }`}
             >
-              Peta Petualangan
+              Petualangan
             </span>
           </div>
         </button>
@@ -148,7 +148,7 @@ export const InteractiveMediaArena: React.FC<InteractiveMediaArenaProps> = ({
                 activeTab === 'telegraf' ? 'text-white' : 'text-stone-900'
               }`}
             >
-              Ketukan Telegraf
+              Telegraf
             </span>
           </div>
         </button>
@@ -185,7 +185,7 @@ export const InteractiveMediaArena: React.FC<InteractiveMediaArenaProps> = ({
                 activeTab === 'duel' ? 'text-white' : 'text-stone-900'
               }`}
             >
-              Lomba 2 Regu
+              Regu
             </span>
           </div>
         </button>
@@ -222,7 +222,7 @@ export const InteractiveMediaArena: React.FC<InteractiveMediaArenaProps> = ({
                 activeTab === 'semafor' ? 'text-white' : 'text-stone-900'
               }`}
             >
-              Latihan Semafor
+              Semafor
             </span>
           </div>
         </button>

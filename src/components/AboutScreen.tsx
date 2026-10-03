@@ -36,14 +36,27 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({ onBack }) => {
         <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
           {/* Avatar with Scout & Code Badge */}
           <div className="relative shrink-0">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-amber-700 via-amber-800 to-stone-900 flex items-center justify-center text-white shadow-md border-4 border-amber-600/20 ring-4 ring-stone-100">
-              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono text-amber-200">
-                bh
-              </span>
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shadow-md border-4 border-amber-700/30 ring-4 ring-stone-100 bg-stone-100 flex items-center justify-center">
+              <img
+                src="/assets/bkdihp_github.png"
+                alt="Foto Profil Budhystory"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.parentElement?.querySelector('.avatar-fallback');
+                  if (fallback) (fallback as HTMLElement).style.display = 'flex';
+                }}
+              />
+              <div className="avatar-fallback hidden w-full h-full bg-gradient-to-br from-amber-700 via-amber-800 to-stone-900 items-center justify-center text-white">
+                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono text-amber-200">
+                  bh
+                </span>
+              </div>
             </div>
             <div
               className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center shadow-md border-2 border-white"
-              title="Pengembang"
+              title="Pengembang Aplikasi"
             >
               <Code2 className="w-4 h-4 text-emerald-100" />
             </div>

@@ -43,8 +43,9 @@ npm run build
 
 ## Penulis & Kredit
 
-- **Rizky Bayu Oktavian** - *Pembuat asli aplikasi* - [@rbayuokt](https://www.instagram.com/rbayuokt/)
-- Dibuat dengan ♥ di Cimahi
+- **budhystory** - *Pengembang & Pemelihara Saat Ini (Banyumas, Jawa Tengah)*
+- Terinspirasi dari proyek awal: [kode.in oleh rbayuokt](https://github.com/rbayuokt/kode.in)
+- Didedikasikan untuk kemajuan Gerakan Pramuka Indonesia
 
 ## Lisensi
 

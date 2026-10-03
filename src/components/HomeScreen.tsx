@@ -18,60 +18,82 @@ import {
 } from './ScoutIcons';
 
 interface HomeScreenProps {
-  onNavigate: (screen: 'morse' | 'rumput' | 'kotak' | 'semafor' | 'about' | 'dictionary') => void;
+  onNavigate: (screen: 'morse' | 'rumput' | 'kotak' | 'semafor' | 'about' | 'dictionary' | 'game') => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 lg:py-10 space-y-8">
-      {/* 1. Hero Section (Clean Minimalist Enterprise Scout Canvas) */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-stone-900 via-stone-900 to-amber-950 text-white p-6 sm:p-10 shadow-lg border border-stone-800">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-8 space-y-8">
+      {/* 1. Hero Section (75" Landscape PID Interactive Cockpit) */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-stone-900 via-stone-900 to-amber-950 text-white p-6 sm:p-10 shadow-xl border border-stone-800">
         {/* Subtle decorative vector watermark icons */}
         <div className="absolute right-4 -bottom-8 opacity-10 pointer-events-none">
-          <TunasKelapaIcon className="w-64 h-64 text-amber-300" />
+          <TunasKelapaIcon className="w-72 h-72 text-amber-300" />
         </div>
-        <div className="absolute right-48 -top-12 opacity-10 pointer-events-none hidden md:block">
-          <WosmFleurIcon className="w-48 h-48 text-amber-200" />
+        <div className="absolute right-64 -top-12 opacity-10 pointer-events-none hidden md:block">
+          <WosmFleurIcon className="w-56 h-56 text-amber-200" />
         </div>
 
-        <div className="relative z-10 max-w-2xl">
+        <div className="relative z-10 max-w-3xl">
           {/* Unboxed Metadata Header (Zero-Pill discipline) */}
-          <div className="flex items-center gap-2.5 text-xs font-semibold text-amber-400/90 tracking-wide uppercase">
+          <div className="flex flex-wrap items-center gap-2.5 text-xs font-semibold text-amber-400/90 tracking-wide uppercase">
             <SandiAppLogo className="w-6 h-6" />
             <span>Gerakan Pramuka Indonesia</span>
             <span aria-hidden="true" className="text-stone-500">·</span>
-            <span>Aplikasi Sandi</span>
+            <span>Praja Muda Karana</span>
             <span aria-hidden="true" className="text-stone-500">·</span>
-            <span>Standar SKU & SKK</span>
+            <span>Siaga & Penggalang</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white mt-3 text-balance leading-tight font-['Poppins']">
-            Sandi — Kriptografi Pramuka
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white mt-3 text-balance leading-tight font-['Poppins']">
+            Sandi Pramuka — Belajar & Bermain Seru!
           </h1>
 
-          <p className="text-stone-300 text-sm sm:text-base mt-3 leading-relaxed">
-            Platform kriptografi dan telegrafi lapangan berstandar enterprise.
-            Terjemahkan, dengarkan sinyal peluit morse, pelajari formasi bendera semafor,
-            serta eksplorasi sandi rumput dan sandi kotak secara instan.
+          <p className="text-stone-300 text-sm sm:text-base mt-3 leading-relaxed max-w-2xl">
+            Selamat datang adik-adik Pramuka! Mari bertualang memecahkan kode rahasia, kumpulkan bintang di setiap level, mainkan ketukan morse, sandi rumput, sandi kotak, dan kuasai bendera semafor bersama teman regumu!
           </p>
 
-          {/* Action CTAs */}
+          {/* Action CTAs for Students & Scouts */}
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <button
               type="button"
-              onClick={() => onNavigate('morse')}
-              className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+              onClick={() => onNavigate('game')}
+              className="px-6 py-3.5 rounded-2xl bg-amber-600 hover:bg-amber-500 active:scale-95 text-white text-sm sm:text-base font-black shadow-lg hover:shadow-xl transition-all flex items-center gap-2.5 cursor-pointer"
             >
-              <span>Mulai Sandi Morse</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>🎮 Mulai Game Petualangan</span>
+              <ArrowRight className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate('morse')}
+              className="px-5 py-3.5 rounded-2xl bg-stone-800/90 hover:bg-stone-700/90 active:scale-95 text-stone-100 text-sm font-bold border border-stone-700 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <PeluitMorseIcon className="w-4 h-4 text-amber-400" />
+              <span>Tulis Sandi</span>
             </button>
             <button
               type="button"
               onClick={() => onNavigate('dictionary')}
-              className="px-4 py-2.5 rounded-xl bg-stone-800/90 hover:bg-stone-700/90 text-stone-200 text-xs sm:text-sm font-semibold border border-stone-700 transition-all flex items-center gap-2"
+              className="px-4 py-3.5 rounded-2xl bg-stone-800/60 hover:bg-stone-700/80 active:scale-95 text-stone-200 text-sm font-semibold border border-stone-700 transition-all flex items-center gap-2 cursor-pointer"
             >
               <BukuSakuIcon className="w-4 h-4 text-amber-400" />
-              <span>Buka Kamus Sandi</span>
+              <span>Kamus Sandi</span>
+            </button>
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="px-4 py-3.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs sm:text-sm font-bold border border-amber-500/40 transition-all flex items-center gap-1.5 cursor-pointer ml-auto"
+              title="Tampilkan Layar Penuh"
+            >
+              <span>Layar Penuh</span>
             </button>
           </div>
         </div>
@@ -93,7 +115,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {/* Card 1: Sandi Morse */}
           <div
             onClick={() => onNavigate('morse')}
@@ -299,7 +321,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             Credit Pengembang
           </button>
           <span>·</span>
-          <span>Cimahi, Jawa Barat</span>
+          <span>Banyumas, Jawa Tengah</span>
         </div>
       </footer>
     </div>

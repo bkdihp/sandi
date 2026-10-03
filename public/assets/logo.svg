@@ -1,116 +1,128 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
   <defs>
-    <!-- Scout Gold/Amber Radial Gradient -->
-    <radialGradient id="badgeGlow" cx="50%" cy="40%" r="60%">
-      <stop offset="0%" stop-color="#FFFBEB" />
-      <stop offset="60%" stop-color="#FEF3C7" />
+    <!-- Background Canvas Ivory / Scout Warm Amber Glow -->
+    <linearGradient id="badgeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF7" />
+      <stop offset="50%" stop-color="#FEF3C7" />
       <stop offset="100%" stop-color="#FDE68A" />
-    </radialGradient>
+    </linearGradient>
 
-    <!-- Warm Scout Khaki / Leather Gradient -->
-    <linearGradient id="scoutBrown" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Siluet Tunas Kelapa: Rich Scout Dark Bronze / Umber -->
+    <linearGradient id="tunasAlami" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#92400E" />
-      <stop offset="50%" stop-color="#78350F" />
-      <stop offset="100%" stop-color="#451A03" />
+      <stop offset="40%" stop-color="#78350F" />
+      <stop offset="85%" stop-color="#552107" />
+      <stop offset="100%" stop-color="#381303" />
     </linearGradient>
 
-    <!-- Flagpole Wood Gradient -->
-    <linearGradient id="poleWood" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#B45309" />
-      <stop offset="100%" stop-color="#78350F" />
-    </linearGradient>
-
-    <!-- Forest Grass Gradient -->
-    <linearGradient id="grassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#16A34A" />
+    <!-- Siluet Rumput Ilalang: Hijau Daun Segar Alami Bertingkat -->
+    <linearGradient id="rumputAlami" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22C55E" />
+      <stop offset="35%" stop-color="#16A34A" />
+      <stop offset="75%" stop-color="#15803D" />
       <stop offset="100%" stop-color="#14532D" />
     </linearGradient>
 
-    <!-- Shadow filter for crisp depth -->
-    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#451A03" flood-opacity="0.25" />
+    <!-- Pijakan Tanah Alami / Humus -->
+    <linearGradient id="tanahAlami" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#14532D" stop-opacity="0.25" />
+      <stop offset="35%" stop-color="#15803D" stop-opacity="0.8" />
+      <stop offset="65%" stop-color="#552107" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#14532D" stop-opacity="0.25" />
+    </linearGradient>
+
+    <!-- Soft Ambient Badge Shadow -->
+    <filter id="softGlow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="0" dy="2.5" stdDeviation="3" flood-color="#78350F" flood-opacity="0.18" />
     </filter>
   </defs>
 
-  <!-- Outer Scout Rope Medallion Ring -->
-  <circle cx="60" cy="60" r="56" fill="url(#badgeGlow)" stroke="#78350F" stroke-width="3" />
-  <circle cx="60" cy="60" r="51" fill="none" stroke="#B45309" stroke-width="1.5" stroke-dasharray="3.5 2.5" />
+  <!-- Squircle Emblem Container -->
+  <rect x="6" y="6" width="108" height="108" rx="26" fill="url(#badgeBg)" stroke="#D97706" stroke-width="1.8" stroke-opacity="0.35" filter="url(#softGlow)" />
+  <rect x="9.5" y="9.5" width="101" height="101" rx="22.5" fill="none" stroke="#B45309" stroke-width="1" stroke-dasharray="3.5 2.5" stroke-opacity="0.22" />
 
-  <!-- ================= CROSSED SEMAPHORE FLAGS ================= -->
-  <!-- Left Flagpole (going from bottom-left to top-right) -->
-  <line x1="26" y1="88" x2="88" y2="18" stroke="url(#poleWood)" stroke-width="3" stroke-linecap="round" />
-  <circle cx="88" cy="18" r="2.5" fill="#D97706" />
+  <!-- ================= 1. SILUET TUNAS KELAPA (SESUAI GAMBAR REFERENSI RESMI) ================= -->
+  <!-- Butir kelapa di kiri dengan ujung lancip ke kiri, tunas menjulang di kanan dengan 2 kuncup daun & akar berlabuh di titik simpul (59, 86) -->
+  <g fill="url(#tunasAlami)">
+    <!-- Badan Cikal Utama -->
+    <path
+      d="M17 66
+         C16 68 19 74 25 79
+         C33 86 46 87 56 86
+         C58 83 60 76 62 68
+         C65 58 68 48 69 38
+         C70 25 66 14 64 7
+         C61 12 59 19 57 27
+         C56 24 54 18 52 14
+         C53 18 54 23 55 29
+         C57 41 57 52 57 62
+         C56 56 54 52 50 49
+         C42 45 31 49 24 55
+         C19 60 17 64 17 66 Z"
+    />
 
-  <!-- Right Flagpole (going from bottom-right to top-left) -->
-  <line x1="94" y1="88" x2="32" y2="18" stroke="url(#poleWood)" stroke-width="3" stroke-linecap="round" />
-  <circle cx="32" cy="18" r="2.5" fill="#D97706" />
+    <!-- Akar Cikal Alami Menghujam Lembut ke Tanah dari Titik Asal (59, 86) -->
+    <path
+      d="M57 86
+         C57.8 89 58.6 92.5 59.5 94
+         C60.4 92.5 61.2 89 61 86 Z"
+      opacity="0.95"
+    />
 
-  <!-- Left Semaphore Flag Cloth (Diagonal Red & Yellow) -->
-  <g transform="translate(18, 16) rotate(-15 20 20)" filter="url(#softShadow)">
-    <!-- Red top-left triangle -->
-    <polygon points="4,4 28,4 4,28" fill="#DC2626" />
-    <!-- Yellow bottom-right triangle -->
-    <polygon points="28,4 28,28 4,28" fill="#FACC15" />
-    <!-- Flag outline -->
-    <rect x="4" y="4" width="24" height="24" fill="none" stroke="#78350F" stroke-width="1.2" rx="1" />
+    <!-- Aksen Serat Daun Muda Translusen Halus -->
+    <path
+      d="M57 28 C56.5 38 56.5 48 57.5 58"
+      stroke="#FDE68A"
+      stroke-width="1"
+      stroke-linecap="round"
+      opacity="0.45"
+    />
   </g>
 
-  <!-- Right Semaphore Flag Cloth (Diagonal Red & Yellow) -->
-  <g transform="translate(68, 16) rotate(15 20 20)" filter="url(#softShadow)">
-    <!-- Yellow top-left triangle -->
-    <polygon points="4,4 28,4 4,28" fill="#FACC15" />
-    <!-- Red bottom-right triangle -->
-    <polygon points="28,4 28,28 4,28" fill="#DC2626" />
-    <!-- Flag outline -->
-    <rect x="4" y="4" width="24" height="24" fill="none" stroke="#78350F" stroke-width="1.2" rx="1" />
+  <!-- ================= 2. RUMPUT ILALANG ALAMI (MELENGKUNG & MENJUNTAI LUWES) ================= -->
+  <!-- Helai rumput ilalang tidak kaku lurus: daun menjulang tinggi lalu melengkung anggun ke bawah
+       mengikuti gravitasi dan tiupan angin alam, berakar dari titik simpul yang sama (59, 86) tanpa overlap -->
+  <g fill="url(#rumputAlami)">
+    <!-- Helai 1: Daun Ilalang Utama (Menjulang, Mencapai Puncak, lalu Menjuntai Melengkung ke Bawah) -->
+    <path
+      d="M59 86
+         C63 68 70 42 79 24
+         C84 15 91 16 96 23
+         C98 27 99 35 97 42
+         C94 34 91 25 85 23
+         C77 24 71 47 67 67
+         C65 77 64 82 63.5 86 Z"
+    />
+
+    <!-- Helai 2: Daun Ilalang Kedua (Melengkung Lembut Menjuntai di Bawah Helai Utama) -->
+    <path
+      d="M60.5 86
+         C65 74 74 58 85 46
+         C91 40 97 41 101 47
+         C103 51 103 57 101 62
+         C98 55 94 48 88 48
+         C80 52 74 65 70 77
+         C68 81 67 84 66 86 Z"
+    />
+
+    <!-- Aksen Tulang Daun Lengkung Alami (Mengikuti Lengkungan Daun Menjuntai) -->
+    <path
+      d="M61 82 C68 64 76 43 85 24 C89 19 93 20 96 28"
+      stroke="#86EFAC"
+      stroke-width="0.8"
+      stroke-linecap="round"
+      fill="none"
+      opacity="0.4"
+    />
   </g>
 
-  <!-- ================= SANDI RUMPUT (GRASS CIPHER BASE) ================= -->
-  <!-- Ground Baseline -->
-  <line x1="18" y1="96" x2="102" y2="96" stroke="#78350F" stroke-width="2.5" stroke-linecap="round" />
-
-  <!-- Scout Grass Cipher Peaks (Alternating Short dot and Tall dash) -->
-  <g fill="none" stroke="url(#grassGrad)" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
-    <!-- Letter S in grass: 3 short blades -->
-    <path d="M22 96 L25 78 L28 96" stroke-width="2.5" />
-    <path d="M28 96 L31 78 L34 96" stroke-width="2.5" />
-    <path d="M34 96 L37 78 L40 96" stroke-width="2.5" />
-
-    <!-- Letter A in grass: 1 short, 1 tall -->
-    <path d="M42 96 L45 78 L48 96" stroke-width="2.5" />
-    <path d="M48 96 L53 58 L58 96" stroke-width="3" />
-
-    <!-- Letter N in grass: 1 tall, 1 short -->
-    <path d="M62 96 L67 58 L72 96" stroke-width="3" />
-    <path d="M72 96 L75 78 L78 96" stroke-width="2.5" />
-
-    <!-- Letter D in grass: 1 tall, 2 short -->
-    <path d="M80 96 L85 58 L90 96" stroke-width="3" />
-    <path d="M90 96 L93 78 L96 96" stroke-width="2.5" />
-    <path d="M96 96 L99 78 L102 96" stroke-width="2.5" />
-  </g>
-
-  <!-- ================= TUNAS KELAPA (COCONUT SPROUT SILHOUETTE) ================= -->
-  <!-- Proud central shoot rising between the flags and over the grass -->
-  <g filter="url(#softShadow)" fill="url(#scoutBrown)">
-    <!-- Central Shoot Leaf -->
-    <path d="M60 22 C57 32 55 42 55 54 C55 64 57.5 73 60 80 C62.5 73 65 64 65 54 C65 42 63 32 60 22 Z" />
-
-    <!-- Left Sprout Frond -->
-    <path d="M59 48 C49 46 38 45 28 50 C24 52 20 56 19 60 C18.8 62 20 63.5 22 63 C30 60 39 59 49 62 C52 57 55 52 59 48 Z" />
-
-    <!-- Right Sprout Frond -->
-    <path d="M61 48 C71 46 82 45 92 50 C96 52 100 56 101 60 C101.2 62 100 63.5 98 63 C90 60 81 59 71 62 C68 57 65 52 61 48 Z" />
-
-    <!-- Coconut Seed Core (Kelapa Bulb) -->
-    <ellipse cx="60" cy="80" rx="14" ry="12" />
-    <!-- Seed Root Base Stem -->
-    <path d="M58 88 C58 93 59 96 60 97 C61 96 62 93 62 88 Z" />
-
-    <!-- Inner Core Highlight Notch -->
-    <path d="M60 28 C59 36 58 45 58 54 C58 62 59 69 60 74 C61 69 62 62 62 54 C62 45 61 36 60 28 Z" fill="#B45309" opacity="0.6" />
-  </g>
-
-  <!-- Little Scout Honor Star at Top Apex -->
-  <polygon points="60,6 62,11 67,11 63,14 65,19 60,16 55,19 57,14 53,11 58,11" fill="#D97706" />
+  <!-- ================= 3. GUNDUKAN TANAH ORGANIK ================= -->
+  <!-- Kontur tanah alami tempat bertumbuhnya cikal kelapa dan rumput ilalang dari satu titik awal -->
+  <path
+    d="M15 88
+       C34 85.5 50 85 59.5 85
+       C69 85 85 85.5 105 88
+       C85 91 50 91.5 15 88 Z"
+    fill="url(#tanahAlami)"
+  />
 </svg>

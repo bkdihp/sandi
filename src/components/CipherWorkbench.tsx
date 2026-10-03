@@ -1,32 +1,36 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Volume2,
-  VolumeX,
   Copy,
   Check,
   RotateCcw,
   Sliders,
   BookOpen,
-  Sparkles,
-  Share2,
+  Keyboard,
+  ZoomIn,
+  Square,
+  Delete,
 } from 'lucide-react';
 import {
   convertToMorse,
   decodeMorse,
   MorsePlayer,
+  WhistleSoundType,
+  WHISTLE_SOUND_OPTIONS,
 } from '../utils/ciphers';
 import {
   PeluitMorseIcon,
   SandiRumputIcon,
   SandiKotakIcon,
   BenderaSemaforIcon,
-  TunasKelapaIcon,
 } from './ScoutIcons';
+import { SemaphoreAnimatedFigure } from './SemaphoreAnimatedFigure';
 
 export type CipherType = 'morse' | 'rumput' | 'kotak' | 'semafor';
 
 interface CipherWorkbenchProps {
   type: CipherType;
+  initialText?: string;
   onOpenDictionary: () => void;
   onSelectType: (type: CipherType) => void;
 }
@@ -36,11 +40,8 @@ const CIPHER_METADATA: Record<
   {
     name: string;
     subtitle: string;
-    kategori: string;
     icon: React.FC<{ className?: string; size?: number }>;
     themeColor: string;
-    badgeBg: string;
-    badgeText: string;
     hint: string;
     presets: string[];
     description: string;
@@ -49,59 +50,48 @@ const CIPHER_METADATA: Record<
   morse: {
     name: 'Sandi Morse',
     subtitle: 'Sandi akustik dan visual universal Gerakan Pramuka',
-    kategori: 'Akustik & Telegrafi',
     icon: PeluitMorseIcon,
     themeColor: '#78350F',
-    badgeBg: 'bg-amber-100',
-    badgeText: 'text-amber-900',
     hint: 'Ketik pesan teks (contoh: Praja Muda Karana)...',
     presets: ['Praja Muda Karana', 'Tri Satya', 'Dasa Darma', 'Pancasila', 'Salam Pramuka'],
     description:
-      'Sandi Morse diciptakan oleh Samuel F.B. Morse dan Alfred Vail pada tahun 1835. Dalam kepramukaan Indonesia, sandi ini dipraktikkan menggunakan tiupan peluit, kedipan senter, kibasan bendera morse, atau tulisan titik-garis.',
+      'Sandi Morse menggunakan kombinasi titik dan garis untuk mentransmisikan pesan. Dalam kepramukaan, sandi ini dipraktikkan melalui tiupan peluit, sinar senter, atau tulisan titik-garis.',
   },
   rumput: {
     name: 'Sandi Rumput',
-    subtitle: 'Turunan visual morse berbentuk ilalang rumput alam',
-    kategori: 'Kriptografi Lapangan',
+    subtitle: 'Kriptografi visual berbasis pola ilalang rumput',
     icon: SandiRumputIcon,
     themeColor: '#15803D',
-    badgeBg: 'bg-emerald-100',
-    badgeText: 'text-emerald-900',
-    hint: 'Ketik teks alfabet (contoh: rbayuokt)...',
+    hint: 'Ketik pesan teks (contoh: berkemah)...',
     presets: ['siaga', 'penggalang', 'penegak', 'pandega', 'berkemah'],
     description:
-      'Sandi Rumput merupakan sistem kriptografi khas pramuka Indonesia yang diturunkan langsung dari Sandi Morse. Rumput pendek melambangkan titik (.), sedangkan rumput tinggi melambangkan garis (-).',
+      'Sandi Rumput merupakan kriptografi khas pramuka Indonesia. Rumput pendek melambangkan titik (.), sedangkan rumput tinggi melambangkan garis (-).',
   },
   kotak: {
     name: 'Sandi Kotak',
-    subtitle: 'Pigpen cipher berbasis kisi kotak pagar dan salang silang',
-    kategori: 'Kriptografi Geometri',
+    subtitle: 'Pigpen cipher berbasis kisi kotak dan bidang silang',
     icon: SandiKotakIcon,
     themeColor: '#334155',
-    badgeBg: 'bg-slate-100',
-    badgeText: 'text-slate-800',
-    hint: 'Ketik pesan teks untuk disandikan ke kotak...',
-    presets: ['pramuka', 'regu garuda', 'patroli', 'jejak', 'sandi rahasia'],
+    hint: 'Ketik pesan teks untuk disandikan...',
+    presets: ['pramuka', 'regu garuda', 'patroli', 'jejak rahasia'],
     description:
-      'Sandi Kotak (Pigpen Cipher) menggunakan petak kisi pagar (3x3) untuk huruf A–R dan petak salib (X) untuk huruf S–Z. Huruf pertama polos tanpa titik, huruf kedua ditandai dengan sebuah titik.',
+      'Sandi Kotak (Pigpen Cipher) menggunakan kisi pagar 3x3 untuk alfabet awal dan bidang silang (X) untuk alfabet akhir dengan penanda titik.',
   },
   semafor: {
     name: 'Sandi Semafor',
-    subtitle: 'Sistem komunikasi visual 8 penjuru mata angin bendera',
-    kategori: 'Sinyal Visual Optik',
+    subtitle: 'Komunikasi visual menggunakan sepasang bendera',
     icon: BenderaSemaforIcon,
     themeColor: '#B91C1C',
-    badgeBg: 'bg-red-100',
-    badgeText: 'text-red-900',
-    hint: 'Ketik pesan untuk konversi gerakan bendera semaphore...',
+    hint: 'Ketik pesan teks untuk gerakan bendera...',
     presets: ['waspada', 'lapor', 'kirim', 'siap bergerak', 'pandu'],
     description:
-      'Semaphore menggunakan sepasang bendera merah-kuning ukuran 45x45 cm pada tangkai 55 cm. Posisi lengan kedua bendera digerakkan searah jarum jam mengelilingi 8 titik penjuru mata angin tubuh pengirim.',
+      'Semafor memanfaatkan posisi kedua lengan dengan bendera merah-kuning berukuran 45x45 cm yang digerakkan pada 8 arah putaran.',
   },
 };
 
 export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
   type,
+  initialText,
   onOpenDictionary,
   onSelectType,
 }) => {
@@ -112,12 +102,35 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
   const [inputText, setInputText] = useState('Praja Muda Karana');
   const [direction, setDirection] = useState<'encode' | 'decode'>('encode'); // for Morse
   const [copied, setCopied] = useState(false);
-  const [showConfig, setShowConfig] = useState(false);
+  const [showFineSpeedSlider, setShowFineSpeedSlider] = useState(false);
 
-  // Morse Player controls
+  // Sync initialText if provided (e.g. from Dictionary)
+  useEffect(() => {
+    if (initialText !== undefined && initialText !== null) {
+      setInputText(initialText);
+    }
+  }, [initialText]);
+
+  // Touch & Display Controls
+  const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
+  const [isJumboScale, setIsJumboScale] = useState(false);
+
+  const handleVirtualKeyPress = (char: string) => {
+    if (char === 'BACKSPACE') {
+      setInputText((prev) => prev.slice(0, -1));
+    } else if (char === 'SPACE') {
+      setInputText((prev) => prev + ' ');
+    } else if (char === 'CLEAR') {
+      setInputText('');
+    } else {
+      setInputText((prev) => prev + char);
+    }
+  };
+
+  // Morse Player controls (Only active for Morse module)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [audioSpeedWpm, setAudioSpeedWpm] = useState<number>(15);
-  const [audioPitchHz, setAudioPitchHz] = useState<number>(650);
+  const [audioSpeedWpm, setAudioSpeedWpm] = useState<number>(6);
+  const [whistleSound, setWhistleSound] = useState<WhistleSoundType>('peluit-pramuka');
   const [isPulseActive, setIsPulseActive] = useState(false);
   const playerRef = useRef<MorsePlayer | null>(null);
 
@@ -150,38 +163,36 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
     return inputText.toLowerCase();
   }, [inputText, type, direction]);
 
-  // Telemetry estimations
   const charCount = inputText.length;
   const wordCount = inputText.trim() ? inputText.trim().split(/\s+/).length : 0;
-  const estimatedMorseSeconds = React.useMemo(() => {
-    if (type !== 'morse' || !outputResult) return 0;
-    // Standard morse PARIS formula at current WPM
-    const dotDurationSec = 1.2 / audioSpeedWpm;
-    let totalUnits = 0;
-    for (const ch of outputResult) {
-      if (ch === '.') totalUnits += 2;
-      else if (ch === '-') totalUnits += 4;
-      else if (ch === ' ') totalUnits += 2;
-    }
-    return Math.max(1, Math.round(totalUnits * dotDurationSec));
-  }, [type, outputResult, audioSpeedWpm]);
 
-  // Handlers
+  // Resolve correct Morse code to play (Morse only)
+  const getMorseCodeToPlay = () => {
+    if (type !== 'morse') return '';
+    if (direction === 'encode') {
+      return outputResult;
+    } else {
+      if (inputText && (inputText.includes('.') || inputText.includes('-'))) {
+        return inputText;
+      }
+      return convertToMorse(outputResult);
+    }
+  };
+
   const handleToggleAudio = () => {
-    if (!playerRef.current) return;
+    if (!playerRef.current || type !== 'morse') return;
 
     if (isPlayingAudio) {
       playerRef.current.stop();
       setIsPlayingAudio(false);
     } else {
-      const codeToPlay =
-        direction === 'encode' ? outputResult : convertToMorse(outputResult);
-      if (!codeToPlay) return;
+      const codeToPlay = getMorseCodeToPlay();
+      if (!codeToPlay || !codeToPlay.trim()) return;
 
       setIsPlayingAudio(true);
       playerRef.current.play(
         codeToPlay,
-        { wpm: audioSpeedWpm, frequency: audioPitchHz },
+        { wpm: audioSpeedWpm, soundType: whistleSound },
         () => {
           setIsPlayingAudio(false);
         }
@@ -189,18 +200,48 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
     }
   };
 
+  const handleSpeedChange = (newSpeed: number) => {
+    setAudioSpeedWpm(newSpeed);
+    if (isPlayingAudio && playerRef.current) {
+      playerRef.current.stop();
+      const codeToPlay = getMorseCodeToPlay();
+      if (codeToPlay) {
+        playerRef.current.play(
+          codeToPlay,
+          { wpm: newSpeed, soundType: whistleSound },
+          () => setIsPlayingAudio(false)
+        );
+      }
+    }
+  };
+
+  const handleWhistleSoundChange = (newSound: WhistleSoundType) => {
+    setWhistleSound(newSound);
+    if (isPlayingAudio && playerRef.current) {
+      playerRef.current.stop();
+      const codeToPlay = getMorseCodeToPlay();
+      if (codeToPlay) {
+        playerRef.current.play(
+          codeToPlay,
+          { wpm: audioSpeedWpm, soundType: newSound },
+          () => setIsPlayingAudio(false)
+        );
+      }
+    }
+  };
+
+  const handlePreviewSound = () => {
+    if (!playerRef.current) return;
+    playerRef.current.stop();
+    setIsPlayingAudio(false);
+    playerRef.current.preview(whistleSound, audioSpeedWpm);
+  };
+
   const handleCopy = () => {
     if (!outputResult) return;
     navigator.clipboard.writeText(outputResult);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleShareFormatted = () => {
-    const formatted = `[SANDI - ${meta.name.toUpperCase()}]\nInput: ${inputText}\nHasil: ${outputResult}\nDiolah via Aplikasi Sandi Gerakan Pramuka`;
-    navigator.clipboard.writeText(formatted);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 1800);
   };
 
   const handleClear = () => {
@@ -213,162 +254,122 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 lg:py-8 space-y-6">
-      {/* 1. Cipher Header & Segmented Selector Bar */}
-      <div className="bg-white rounded-2xl border border-stone-200/80 p-4 sm:p-6 shadow-xs">
+      {/* 1. Header Toolbar */}
+      <div className="bg-white rounded-2xl border border-stone-200/90 p-4 sm:p-5 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center shadow-xs border border-stone-200/60"
-              style={{ backgroundColor: `${meta.themeColor}12`, color: meta.themeColor }}
+              className="w-11 h-11 rounded-xl flex items-center justify-center border border-stone-200/70 shrink-0"
+              style={{ backgroundColor: `${meta.themeColor}10`, color: meta.themeColor }}
             >
-              <IconComponent className="w-7 h-7" />
+              <IconComponent className="w-6 h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-stone-900 tracking-tight">
-                  {meta.name}
-                </h1>
-                <span className="text-xs text-stone-500">· {meta.kategori}</span>
-              </div>
-              <p className="text-xs sm:text-sm text-stone-500 mt-0.5 line-clamp-1">
+              <h1 className="text-lg font-bold text-stone-900 tracking-tight">
+                {meta.name}
+              </h1>
+              <p className="text-xs text-stone-500 mt-0.5">
                 {meta.subtitle}
               </p>
             </div>
           </div>
 
-          {/* Cipher Type Switcher Tabs */}
-          <div className="flex items-center gap-1.5 p-1 bg-stone-100/90 rounded-xl overflow-x-auto max-w-full">
-            {(['morse', 'rumput', 'kotak', 'semafor'] as CipherType[]).map((cKey) => {
-              const cMeta = CIPHER_METADATA[cKey];
-              const CIcon = cMeta.icon;
-              const isActive = type === cKey;
-              return (
-                <button
-                  key={cKey}
-                  type="button"
-                  onClick={() => onSelectType(cKey)}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
-                    isActive
-                      ? 'bg-white text-stone-900 shadow-xs border border-stone-200/70 font-bold'
-                      : 'text-stone-600 hover:text-stone-900 hover:bg-white/50'
-                  }`}
-                >
-                  <CIcon className="w-4 h-4" />
-                  <span className="capitalize">{cMeta.name.replace('Sandi ', '')}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Direction Switcher (Exclusive for Morse: Encode vs Decode) */}
-        {type === 'morse' && (
-          <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
-                Mode Aliran:
-              </span>
-              <div className="flex items-center p-0.5 bg-stone-100 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDirection('encode');
-                    setInputText('Praja Muda Karana');
-                  }}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
-                    direction === 'encode'
-                      ? 'bg-amber-800 text-white shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900'
-                  }`}
-                >
-                  Teks &rarr; Sandi Morse
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDirection('decode');
-                    setInputText('.-. . --. ..-   --. .- .-. ..- -.. .-');
-                  }}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
-                    direction === 'decode'
-                      ? 'bg-amber-800 text-white shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900'
-                  }`}
-                >
-                  Sandi Morse &rarr; Teks
-                </button>
-              </div>
+          {/* Cipher Type Switcher & Tools */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1 p-1 bg-stone-100/90 rounded-xl">
+              {(['morse', 'rumput', 'kotak', 'semafor'] as CipherType[]).map((cKey) => {
+                const cMeta = CIPHER_METADATA[cKey];
+                const CIcon = cMeta.icon;
+                const isActive = type === cKey;
+                return (
+                  <button
+                    key={cKey}
+                    type="button"
+                    onClick={() => {
+                      if (playerRef.current) playerRef.current.stop();
+                      setIsPlayingAudio(false);
+                      onSelectType(cKey);
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-white text-stone-900 shadow-2xs border border-stone-200 font-bold'
+                        : 'text-stone-600 hover:text-stone-900'
+                    }`}
+                  >
+                    <CIcon className="w-3.5 h-3.5" />
+                    <span>{cMeta.name.replace('Sandi ', '')}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Audio Settings Trigger */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => setShowConfig(!showConfig)}
-                className={`text-xs px-2.5 py-1.5 rounded-lg border flex items-center gap-1.5 transition-colors ${
-                  showConfig
-                    ? 'bg-stone-800 text-white border-stone-800'
-                    : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
+                onClick={() => setShowVirtualKeyboard(!showVirtualKeyboard)}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  showVirtualKeyboard
+                    ? 'bg-stone-900 text-white border-stone-900 shadow-xs'
+                    : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
                 }`}
+                title="Papan Ketik Layar"
               >
-                <Sliders className="w-3.5 h-3.5" />
-                <span>Pengaturan Audio ({audioSpeedWpm} WPM · {audioPitchHz} Hz)</span>
+                <Keyboard className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Papan Ketik</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsJumboScale(!isJumboScale)}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isJumboScale
+                    ? 'bg-stone-900 text-white border-stone-900 shadow-xs'
+                    : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
+                }`}
+                title="Perbesar Ukuran Sandi"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Perbesar</span>
               </button>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Audio Tuning Drawer (Expandable) */}
-        {type === 'morse' && showConfig && (
-          <div className="mt-3 p-4 bg-stone-50 rounded-xl border border-stone-200 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs animate-fadeIn">
-            <div>
-              <label className="font-semibold text-stone-700 block mb-1">
-                Kecepatan Transmisi (WPM - Words Per Minute):
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="range"
-                  min={6}
-                  max={30}
-                  step={1}
-                  value={audioSpeedWpm}
-                  onChange={(e) => setAudioSpeedWpm(Number(e.target.value))}
-                  className="flex-1 accent-amber-700"
-                />
-                <span className="font-mono font-bold text-stone-900 w-16 text-right">
-                  {audioSpeedWpm} WPM
-                </span>
-              </div>
-              <div className="flex justify-between text-[10px] text-stone-400 mt-1">
-                <span>Siaga (8 WPM)</span>
-                <span>Penggalang (15 WPM)</span>
-                <span>Penegak (24 WPM)</span>
-              </div>
-            </div>
-
-            <div>
-              <label className="font-semibold text-stone-700 block mb-1">
-                Frekuensi Nada Peluit Morse (Pitch):
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="range"
-                  min={400}
-                  max={1000}
-                  step={50}
-                  value={audioPitchHz}
-                  onChange={(e) => setAudioPitchHz(Number(e.target.value))}
-                  className="flex-1 accent-amber-700"
-                />
-                <span className="font-mono font-bold text-stone-900 w-16 text-right">
-                  {audioPitchHz} Hz
-                </span>
-              </div>
-              <div className="flex justify-between text-[10px] text-stone-400 mt-1">
-                <span>Peluit Berat (550Hz)</span>
-                <span>Standar (650Hz)</span>
-                <span>Nyaring (800Hz)</span>
-              </div>
+        {/* Direction Switcher (Morse only) */}
+        {type === 'morse' && (
+          <div className="mt-3.5 pt-3 border-t border-stone-100 flex items-center gap-2">
+            <span className="text-xs font-medium text-stone-500">
+              Arah:
+            </span>
+            <div className="flex items-center p-0.5 bg-stone-100 rounded-lg text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setDirection('encode');
+                  setInputText('Praja Muda Karana');
+                }}
+                className={`px-3 py-1 font-semibold rounded-md transition-all cursor-pointer ${
+                  direction === 'encode'
+                    ? 'bg-amber-800 text-white shadow-2xs font-bold'
+                    : 'text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                Teks &rarr; Morse
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDirection('decode');
+                  setInputText('.-. . --. ..-   --. .- .-. ..- -.. .-');
+                }}
+                className={`px-3 py-1 font-semibold rounded-md transition-all cursor-pointer ${
+                  direction === 'decode'
+                    ? 'bg-amber-800 text-white shadow-2xs font-bold'
+                    : 'text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                Morse &rarr; Teks
+              </button>
             </div>
           </div>
         )}
@@ -376,26 +377,26 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
 
       {/* 2. Main Workbench Dual Stage (Input & Output) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Input Workbench Area */}
+        {/* Left Column: Input Box */}
         <div className="lg:col-span-6 flex flex-col">
-          <div className="bg-white rounded-2xl border border-stone-200/80 p-5 shadow-xs flex-1 flex flex-col justify-between">
+          <div className="bg-white rounded-2xl border border-stone-200/90 p-5 shadow-xs flex-1 flex flex-col justify-between">
             <div>
-              {/* Input Header & Clear */}
+              {/* Header */}
               <div className="flex items-center justify-between pb-2.5 border-b border-stone-100">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
-                    {direction === 'encode' ? 'Teks Masukan' : 'Kode Morse Masukan'}
+                <div className="flex items-center gap-2 text-xs text-stone-500">
+                  <span className="font-semibold uppercase tracking-wider text-stone-700">
+                    {direction === 'encode' ? 'Teks Masukan' : 'Kode Morse'}
                   </span>
-                  <span className="text-stone-400">·</span>
-                  <span className="text-xs text-stone-400">
-                    {charCount} karakter · {wordCount} kata
-                  </span>
+                  <span>·</span>
+                  <span>{charCount} karakter</span>
+                  <span>·</span>
+                  <span>{wordCount} kata</span>
                 </div>
                 {inputText && (
                   <button
                     type="button"
                     onClick={handleClear}
-                    className="text-xs text-stone-400 hover:text-stone-700 flex items-center gap-1 transition-colors"
+                    className="text-xs text-stone-400 hover:text-stone-700 flex items-center gap-1 transition-colors cursor-pointer"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Hapus</span>
@@ -410,222 +411,436 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                 placeholder={
                   direction === 'encode'
                     ? meta.hint
-                    : 'Ketik atau tempel kode morse (contoh: ... --- ...)...'
+                    : 'Ketik kode morse (contoh: ... --- ... / .- .-.)...'
                 }
-                rows={6}
-                className="w-full mt-3 p-3.5 bg-stone-50/70 border border-stone-200/80 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600/20 focus:border-amber-700 text-sm leading-relaxed transition-all resize-y min-h-[140px]"
+                rows={5}
+                className="w-full mt-3 p-3 bg-stone-50/70 border border-stone-200/80 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-amber-700 focus:border-amber-700 text-sm leading-relaxed transition-all resize-y min-h-[125px]"
               />
 
-              {/* Quick Presets */}
-              <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-medium text-stone-400 mr-1 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-amber-600" /> Contoh:
-                </span>
+              {/* Presets */}
+              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                <span className="text-xs text-stone-400 mr-1">Contoh:</span>
                 {meta.presets.map((preset) => (
                   <button
                     key={preset}
                     type="button"
-                    onClick={() => {
-                      setInputText(preset);
-                    }}
-                    className="text-xs px-2.5 py-1 rounded-md bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium transition-colors"
+                    onClick={() => setInputText(preset)}
+                    className="text-xs px-2 py-0.5 rounded-md bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium transition-colors cursor-pointer"
                   >
                     {preset}
                   </button>
                 ))}
               </div>
+
+              {/* Professional Elegant Virtual Keyboard */}
+              {showVirtualKeyboard && (
+                <div className="mt-3 p-3 bg-stone-100 rounded-2xl border border-stone-200 animate-fadeIn space-y-1.5 select-none shadow-2xs">
+                  {type === 'morse' && direction === 'decode' ? (
+                    /* Elegant Paddle Keyboard for Morse Decode */
+                    <div className="grid grid-cols-6 gap-1.5 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => handleVirtualKeyPress('.')}
+                        className="h-12 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-xl font-mono font-bold text-2xl text-stone-900 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                      >
+                        ·
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleVirtualKeyPress('-')}
+                        className="h-12 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-xl font-mono font-bold text-2xl text-stone-900 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                      >
+                        —
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleVirtualKeyPress('/')}
+                        className="h-12 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-xl font-mono font-bold text-lg text-stone-900 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                      >
+                        /
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleVirtualKeyPress('SPACE')}
+                        className="h-12 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-xl font-medium text-xs text-stone-700 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                      >
+                        Spasi
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleVirtualKeyPress('BACKSPACE')}
+                        className="h-12 bg-white hover:bg-rose-50 active:scale-95 border border-stone-300 rounded-xl text-stone-700 hover:text-rose-600 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                        title="Hapus"
+                      >
+                        <Delete className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleVirtualKeyPress('CLEAR')}
+                        className="h-12 bg-stone-200 hover:bg-stone-300 active:scale-95 rounded-xl font-medium text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                      >
+                        Bersihkan
+                      </button>
+                    </div>
+                  ) : (
+                    /* Refined, Minimalist Hardware Keyboard Layout */
+                    <div className="space-y-1 pt-0.5">
+                      {/* Numbers Row */}
+                      <div className="flex justify-center gap-1">
+                        {'1234567890'.split('').map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => handleVirtualKeyPress(num)}
+                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-lg font-mono font-semibold text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* QWERTY Row 1 */}
+                      <div className="flex justify-center gap-1">
+                        {'QWERTYUIOP'.split('').map((k) => (
+                          <button
+                            key={k}
+                            type="button"
+                            onClick={() => handleVirtualKeyPress(k)}
+                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-lg font-medium text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                          >
+                            {k}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* QWERTY Row 2 */}
+                      <div className="flex justify-center gap-1">
+                        {'ASDFGHJKL'.split('').map((k) => (
+                          <button
+                            key={k}
+                            type="button"
+                            onClick={() => handleVirtualKeyPress(k)}
+                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-lg font-medium text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                          >
+                            {k}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* QWERTY Row 3 */}
+                      <div className="flex justify-center gap-1">
+                        {'ZXCVBNM'.split('').map((k) => (
+                          <button
+                            key={k}
+                            type="button"
+                            onClick={() => handleVirtualKeyPress(k)}
+                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-lg font-medium text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                          >
+                            {k}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Punctuation Row */}
+                      <div className="flex justify-center gap-1">
+                        {['.', ',', '?', '!', '-', '/'].map((p) => (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => handleVirtualKeyPress(p)}
+                            className="flex-1 max-w-[56px] h-8 bg-stone-200/70 hover:bg-stone-200 active:scale-95 border border-stone-300 rounded-lg font-mono font-semibold text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                          >
+                            {p}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Space & Control Row */}
+                      <div className="flex justify-center gap-1.5 pt-0.5">
+                        <button
+                          type="button"
+                          onClick={() => handleVirtualKeyPress('SPACE')}
+                          className="flex-1 max-w-sm h-8 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-medium text-xs rounded-lg shadow-2xs flex items-center justify-center cursor-pointer"
+                        >
+                          Spasi
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleVirtualKeyPress('BACKSPACE')}
+                          className="px-3 h-8 bg-white hover:bg-rose-50 active:scale-95 border border-stone-300 text-stone-700 hover:text-rose-600 text-xs rounded-lg shadow-2xs flex items-center justify-center cursor-pointer"
+                          title="Hapus"
+                        >
+                          <Delete className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleVirtualKeyPress('CLEAR')}
+                          className="px-3 h-8 bg-stone-200 hover:bg-stone-300 active:scale-95 text-stone-700 text-xs font-medium rounded-lg shadow-2xs flex items-center justify-center cursor-pointer"
+                        >
+                          Bersihkan
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Workbench Hint Footer */}
-            <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
-              <span>Konversi instan aktif secara otomatis</span>
+            {/* Footer */}
+            <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-end">
               <button
                 type="button"
                 onClick={onOpenDictionary}
-                className="text-amber-800 hover:text-amber-950 font-semibold flex items-center gap-1"
+                className="text-amber-800 hover:text-amber-950 font-semibold text-xs flex items-center gap-1.5 cursor-pointer"
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>Buka Kamus Sandi</span>
+                <span>Buku Saku Sandi</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Translated Result Canvas */}
+        {/* Right Column: Output & Simulation */}
         <div className="lg:col-span-6 flex flex-col">
-          <div className="bg-white rounded-2xl border border-stone-200/80 p-5 shadow-xs flex-1 flex flex-col justify-between relative overflow-hidden">
+          <div className="bg-white rounded-2xl border border-stone-200/90 p-5 shadow-xs flex-1 flex flex-col justify-between relative overflow-hidden">
             <div>
-              {/* Output Header */}
+              {/* Header */}
               <div className="flex items-center justify-between pb-2.5 border-b border-stone-100">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
-                    Hasil Terjemahan
-                  </span>
-                  {type === 'morse' && (
+                <span className="text-xs font-semibold uppercase tracking-wider text-stone-700">
+                  Hasil Terjemahan
+                </span>
+
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium flex items-center gap-1.5 transition-colors border border-stone-200/60 cursor-pointer"
+                  title="Salin Hasil"
+                >
+                  {copied ? (
                     <>
-                      <span className="text-stone-400">·</span>
-                      <span className="text-xs text-stone-400">
-                        Est. durasi {estimatedMorseSeconds}s
-                      </span>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Tersalin</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Salin</span>
                     </>
                   )}
-                </div>
-
-                {/* Primary Action Buttons */}
-                <div className="flex items-center gap-1.5">
-                  {type === 'morse' && (
-                    <button
-                      type="button"
-                      onClick={handleToggleAudio}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                        isPlayingAudio
-                          ? 'bg-amber-700 text-white animate-pulse shadow-sm'
-                          : 'bg-amber-100 hover:bg-amber-200/80 text-amber-900 border border-amber-200'
-                      }`}
-                      title={isPlayingAudio ? 'Hentikan Bunyi' : 'Dengarkan Peluit Morse'}
-                    >
-                      {isPlayingAudio ? (
-                        <>
-                          <VolumeX className="w-3.5 h-3.5" />
-                          <span>Stop Bunyi</span>
-                        </>
-                      ) : (
-                        <>
-                          <Volume2 className="w-3.5 h-3.5" />
-                          <span>Bunyikan</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors border border-stone-200/60"
-                    title="Salin Hasil ke Clipboard"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Tersalin</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Salin</span>
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleShareFormatted}
-                    className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100"
-                    title="Salin Kartu Sandi Lengkap"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                </button>
               </div>
 
-              {/* Sound Pulse Indicator Bar (during Morse playback) */}
-              {type === 'morse' && isPlayingAudio && (
-                <div className="mt-3 p-2 bg-amber-50 rounded-lg border border-amber-200/70 flex items-center justify-between text-xs text-amber-900 animate-fadeIn">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-3 h-3 rounded-full transition-all duration-75 ${
-                        isPulseActive
-                          ? 'bg-amber-600 scale-125 shadow-md shadow-amber-500/50'
-                          : 'bg-stone-300 scale-90'
-                      }`}
-                    />
-                    <span className="font-medium">
-                      {isPulseActive ? 'Mengirim Sinyal Nada...' : 'Jeda Interval...'}
-                    </span>
+              {/* MORSE ONLY: Single Ergonomic Audio Deck (Hidden for Rumput, Kotak, Semafor) */}
+              {type === 'morse' && (
+                <div className="mt-3 bg-stone-50 rounded-xl border border-stone-200 p-3 space-y-2.5 shadow-2xs">
+                  {/* Play & Preview Actions */}
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleToggleAudio}
+                        disabled={!outputResult}
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          !outputResult
+                            ? 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                            : isPlayingAudio
+                            ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-xs'
+                            : 'bg-amber-800 hover:bg-amber-900 text-white shadow-xs'
+                        }`}
+                      >
+                        {isPlayingAudio ? (
+                          <>
+                            <Square className="w-3.5 h-3.5 fill-current shrink-0" />
+                            <span>Hentikan</span>
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="w-3.5 h-3.5 shrink-0" />
+                            <span>Bunyikan ({audioSpeedWpm} WPM)</span>
+                          </>
+                        )}
+                      </button>
+
+                      {isPlayingAudio && (
+                        <span className="text-[11px] font-mono font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
+                          {isPulseActive ? 'TIUPAN' : 'JEDA'}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={handlePreviewSound}
+                        className="px-2 py-1 rounded-md bg-white hover:bg-stone-100 text-stone-700 text-xs font-medium border border-stone-200 cursor-pointer"
+                        title="Dengar sampel nada"
+                      >
+                        Coba Nada
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowFineSpeedSlider(!showFineSpeedSlider)}
+                        className={`p-1 rounded-md border transition-colors cursor-pointer ${
+                          showFineSpeedSlider
+                            ? 'bg-amber-800 text-white border-amber-800'
+                            : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-100'
+                        }`}
+                        title="Atur kecepatan teliti"
+                      >
+                        <Sliders className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
-                  <span className="font-mono text-[11px]">{audioSpeedWpm} WPM</span>
+
+                  {/* Whistle Presets */}
+                  <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
+                    <span className="text-[11px] text-stone-500 font-medium mr-1 shrink-0">Suara:</span>
+                    {WHISTLE_SOUND_OPTIONS.map((ws) => {
+                      const isSelected = whistleSound === ws.id;
+                      return (
+                        <button
+                          key={ws.id}
+                          type="button"
+                          onClick={() => handleWhistleSoundChange(ws.id)}
+                          className={`px-2 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
+                            isSelected
+                              ? 'bg-amber-800 text-white shadow-2xs font-bold'
+                              : 'bg-white text-stone-700 border border-stone-200 hover:bg-stone-100'
+                          }`}
+                        >
+                          {ws.shortName}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Speed Presets */}
+                  <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
+                    <span className="text-[11px] text-stone-500 font-medium mr-1 shrink-0">Tempo:</span>
+                    {[
+                      { speed: 4, label: '4 WPM' },
+                      { speed: 6, label: '6 WPM' },
+                      { speed: 10, label: '10 WPM' },
+                      { speed: 16, label: '16 WPM' },
+                    ].map((sp) => {
+                      const isSelected = audioSpeedWpm === sp.speed;
+                      return (
+                        <button
+                          key={sp.speed}
+                          type="button"
+                          onClick={() => handleSpeedChange(sp.speed)}
+                          className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-amber-800 text-white shadow-2xs font-bold'
+                              : 'bg-white text-stone-700 border border-stone-200 hover:bg-stone-100'
+                          }`}
+                        >
+                          {sp.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Optional Fine-Tuning Slider */}
+                  {showFineSpeedSlider && (
+                    <div className="pt-2 border-t border-stone-200 flex items-center gap-2 text-xs">
+                      <span className="text-stone-400 font-mono text-[10px]">4</span>
+                      <input
+                        type="range"
+                        min={4}
+                        max={22}
+                        step={1}
+                        value={audioSpeedWpm}
+                        onChange={(e) => handleSpeedChange(Number(e.target.value))}
+                        className="flex-1 accent-amber-800 cursor-pointer"
+                      />
+                      <span className="text-stone-400 font-mono text-[10px]">22 WPM</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SEMAFOR ONLY: Semaphore Animated Figure Simulation */}
+              {type === 'semafor' && (
+                <div className="mt-3">
+                  <SemaphoreAnimatedFigure text={inputText} compact />
                 </div>
               )}
 
               {/* Output Content Display Canvas */}
-              <div className="mt-4 p-5 rounded-xl bg-stone-50/80 border border-stone-200/80 min-h-[170px] flex items-center justify-center overflow-x-auto">
+              <div className="mt-3.5 p-4 rounded-xl bg-stone-50/70 border border-stone-200/80 min-h-[140px] flex items-center justify-center overflow-x-auto">
                 {outputResult ? (
-                  <div className="w-full text-center">
+                  <div className={`w-full text-center transition-all ${isJumboScale ? 'py-6' : ''}`}>
                     {/* Sandi Morse Display */}
                     {type === 'morse' && (
-                      <div className="font-mono text-2xl sm:text-3xl font-bold text-stone-900 tracking-widest break-words leading-relaxed select-all">
+                      <div
+                        className={`font-mono font-black text-stone-900 tracking-widest break-words leading-relaxed select-all transition-all ${
+                          isJumboScale
+                            ? 'text-3xl sm:text-4xl lg:text-5xl text-amber-950'
+                            : 'text-xl sm:text-2xl'
+                        }`}
+                      >
                         {outputResult}
                       </div>
                     )}
 
                     {/* Sandi Rumput Display */}
                     {type === 'rumput' && (
-                      <div className="space-y-3">
-                        <div className="font-sandi-rumput text-5xl sm:text-6xl text-emerald-900 break-words leading-normal select-all tracking-normal">
-                          {outputResult}
-                        </div>
-                        <p className="text-xs text-stone-400 font-mono">
-                          Font Sandi Rumput Pramuka Autentik
-                        </p>
+                      <div
+                        className={`font-sandi-rumput text-emerald-900 break-words leading-normal select-all tracking-normal transition-all ${
+                          isJumboScale
+                            ? 'text-7xl sm:text-8xl'
+                            : 'text-5xl sm:text-6xl'
+                        }`}
+                      >
+                        {outputResult}
                       </div>
                     )}
 
                     {/* Sandi Kotak Display */}
                     {type === 'kotak' && (
-                      <div className="space-y-3">
-                        <div className="font-sandi-kotak text-5xl sm:text-6xl text-slate-800 break-words leading-normal select-all tracking-[0.25em]">
-                          {outputResult}
-                        </div>
-                        <p className="text-xs text-stone-400 font-sans">
-                          Font Sandi Kotak (Pigpen Cipher)
-                        </p>
+                      <div
+                        className={`font-sandi-kotak text-slate-800 break-words leading-normal select-all tracking-[0.25em] transition-all ${
+                          isJumboScale
+                            ? 'text-7xl sm:text-8xl'
+                            : 'text-5xl sm:text-6xl'
+                        }`}
+                      >
+                        {outputResult}
                       </div>
                     )}
 
                     {/* Sandi Semafor Display */}
                     {type === 'semafor' && (
-                      <div className="space-y-3">
-                        <div className="font-sandi-semafor text-6xl sm:text-7xl text-stone-900 break-words leading-normal select-all tracking-[0.35em]">
-                          {outputResult}
-                        </div>
-                        <p className="text-xs text-stone-400 font-sans">
-                          Font Posisi Bendera Semafor
-                        </p>
+                      <div
+                        className={`font-sandi-semafor text-stone-900 break-words leading-normal select-all tracking-[0.35em] transition-all ${
+                          isJumboScale
+                            ? 'text-7xl sm:text-8xl'
+                            : 'text-5xl sm:text-6xl'
+                        }`}
+                      >
+                        {outputResult}
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="text-center text-stone-400 text-xs py-8">
-                    Masukkan teks pada kotak sebelah kiri untuk melihat hasil sandi.
+                  <div className="text-center text-stone-400 text-xs py-6">
+                    Ketik teks untuk melihat representasi sandi.
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Bottom Insight Footer */}
-            <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-400">
-              <span className="flex items-center gap-1.5">
-                <TunasKelapaIcon className="w-3.5 h-3.5 text-amber-800" />
-                <span>Standar Kepramukaan Kwarnas Gerakan Pramuka</span>
-              </span>
-              <span>v2.0 Enterprise</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. Educational Information Accordion / Card */}
-      <div className="bg-stone-50/90 rounded-2xl border border-stone-200/80 p-5 sm:p-6 text-stone-700 text-xs sm:text-sm leading-relaxed">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2 text-stone-900 font-bold text-sm sm:text-base">
-            <IconComponent className="w-4 h-4 text-amber-800" />
-            <span>Mengenal {meta.name}</span>
-          </div>
-          <span className="text-xs text-amber-800 font-semibold bg-amber-100/70 px-2.5 py-0.5 rounded-full">
-            Panduan SKU & SKK
-          </span>
-        </div>
-        <p className="text-stone-600 mt-1">{meta.description}</p>
+      {/* 3. Educational Information Card */}
+      <div className="bg-stone-50/90 rounded-2xl border border-stone-200/80 p-4 sm:p-5 text-stone-700 text-xs sm:text-sm leading-relaxed">
+        <h3 className="text-stone-900 font-bold text-sm mb-1">
+          Tentang {meta.name}
+        </h3>
+        <p className="text-stone-600">{meta.description}</p>
       </div>
     </div>
   );

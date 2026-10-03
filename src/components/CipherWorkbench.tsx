@@ -436,40 +436,44 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
               {showVirtualKeyboard && (
                 <div className="mt-3 p-3 bg-stone-100 rounded-2xl border border-stone-200 animate-fadeIn space-y-1.5 select-none shadow-2xs">
                   {type === 'morse' && direction === 'decode' ? (
-                    /* Elegant Paddle Keyboard for Morse Decode */
+                    /* Elegant Tactile Paddle Keyboard for Morse Decode */
                     <div className="grid grid-cols-6 gap-1.5 pt-1">
                       <button
                         type="button"
                         onClick={() => handleVirtualKeyPress('.')}
-                        className="h-12 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-xl font-mono font-bold text-2xl text-stone-900 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                        className="h-11 bg-white hover:bg-stone-50 active:translate-y-0.5 border border-stone-300/80 border-b-2 border-b-stone-400/80 rounded-xl font-mono font-bold text-2xl text-stone-900 shadow-2xs flex items-center justify-center cursor-pointer transition-all"
+                        title="Titik (·)"
                       >
                         ·
                       </button>
                       <button
                         type="button"
                         onClick={() => handleVirtualKeyPress('-')}
-                        className="h-12 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-xl font-mono font-bold text-2xl text-stone-900 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                        className="h-11 bg-white hover:bg-stone-50 active:translate-y-0.5 border border-stone-300/80 border-b-2 border-b-stone-400/80 rounded-xl font-mono font-bold text-2xl text-stone-900 shadow-2xs flex items-center justify-center cursor-pointer transition-all"
+                        title="Garis (—)"
                       >
                         —
                       </button>
                       <button
                         type="button"
                         onClick={() => handleVirtualKeyPress('/')}
-                        className="h-12 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-xl font-mono font-bold text-lg text-stone-900 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                        className="h-11 bg-white hover:bg-stone-50 active:translate-y-0.5 border border-stone-300/80 border-b-2 border-b-stone-400/80 rounded-xl font-mono font-bold text-base text-stone-900 shadow-2xs flex items-center justify-center cursor-pointer transition-all"
+                        title="Pemisah Kata (/)"
                       >
                         /
                       </button>
                       <button
                         type="button"
                         onClick={() => handleVirtualKeyPress('SPACE')}
-                        className="h-12 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-xl font-medium text-xs text-stone-700 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                        className="h-11 bg-white hover:bg-stone-50 active:translate-y-0.5 border border-stone-300/80 border-b-2 border-b-stone-400/80 rounded-xl font-mono text-sm text-stone-700 shadow-2xs flex items-center justify-center cursor-pointer transition-all"
+                        title="Spasi"
                       >
-                        Spasi
+                        ␣
                       </button>
                       <button
                         type="button"
                         onClick={() => handleVirtualKeyPress('BACKSPACE')}
-                        className="h-12 bg-white hover:bg-rose-50 active:scale-95 border border-stone-300 rounded-xl text-stone-700 hover:text-rose-600 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                        className="h-11 bg-white hover:bg-rose-50 active:translate-y-0.5 border border-stone-300/80 border-b-2 border-b-stone-400/80 rounded-xl text-stone-700 hover:text-rose-600 shadow-2xs flex items-center justify-center cursor-pointer transition-all"
                         title="Hapus"
                       >
                         <Delete className="w-4 h-4" />
@@ -477,13 +481,14 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                       <button
                         type="button"
                         onClick={() => handleVirtualKeyPress('CLEAR')}
-                        className="h-12 bg-stone-200 hover:bg-stone-300 active:scale-95 rounded-xl font-medium text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                        className="h-11 bg-stone-200 hover:bg-stone-300 active:translate-y-0.5 border border-stone-300 border-b-2 border-b-stone-400 rounded-xl text-stone-700 shadow-2xs flex items-center justify-center cursor-pointer transition-all"
+                        title="Bersihkan"
                       >
-                        Bersihkan
+                        <RotateCcw className="w-4 h-4" />
                       </button>
                     </div>
                   ) : (
-                    /* Refined, Minimalist Hardware Keyboard Layout */
+                    /* Refined Minimalist Tactile Hardware Keyboard */
                     <div className="space-y-1 pt-0.5">
                       {/* Numbers Row */}
                       <div className="flex justify-center gap-1">
@@ -492,7 +497,7 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                             key={num}
                             type="button"
                             onClick={() => handleVirtualKeyPress(num)}
-                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-lg font-mono font-semibold text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:translate-y-0.5 border border-stone-300/80 border-b-2 border-b-stone-400/80 rounded-lg font-mono font-semibold text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-all"
                           >
                             {num}
                           </button>
@@ -506,7 +511,7 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                             key={k}
                             type="button"
                             onClick={() => handleVirtualKeyPress(k)}
-                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-lg font-medium text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:translate-y-0.5 border border-stone-300/80 border-b-2 border-b-stone-400/80 rounded-lg font-medium text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-all"
                           >
                             {k}
                           </button>
@@ -520,7 +525,7 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                             key={k}
                             type="button"
                             onClick={() => handleVirtualKeyPress(k)}
-                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-lg font-medium text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:translate-y-0.5 border border-stone-300/80 border-b-2 border-b-stone-400/80 rounded-lg font-medium text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-all"
                           >
                             {k}
                           </button>
@@ -534,7 +539,7 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                             key={k}
                             type="button"
                             onClick={() => handleVirtualKeyPress(k)}
-                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 rounded-lg font-medium text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                            className="flex-1 max-w-[42px] h-9 bg-white hover:bg-stone-50 active:translate-y-0.5 border border-stone-300/80 border-b-2 border-b-stone-400/80 rounded-lg font-medium text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-all"
                           >
                             {k}
                           </button>
@@ -548,26 +553,27 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                             key={p}
                             type="button"
                             onClick={() => handleVirtualKeyPress(p)}
-                            className="flex-1 max-w-[56px] h-8 bg-stone-200/70 hover:bg-stone-200 active:scale-95 border border-stone-300 rounded-lg font-mono font-semibold text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-transform"
+                            className="flex-1 max-w-[56px] h-8 bg-stone-200/70 hover:bg-stone-200 active:translate-y-0.5 border border-stone-300/80 border-b-2 border-b-stone-400/70 rounded-lg font-mono font-semibold text-xs text-stone-800 shadow-2xs flex items-center justify-center cursor-pointer transition-all"
                           >
                             {p}
                           </button>
                         ))}
                       </div>
 
-                      {/* Space & Control Row */}
+                      {/* Space & Minimal Controls */}
                       <div className="flex justify-center gap-1.5 pt-0.5">
                         <button
                           type="button"
                           onClick={() => handleVirtualKeyPress('SPACE')}
-                          className="flex-1 max-w-sm h-8 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-medium text-xs rounded-lg shadow-2xs flex items-center justify-center cursor-pointer"
+                          className="flex-1 max-w-sm h-8 bg-stone-800 hover:bg-stone-700 active:translate-y-0.5 border border-stone-900 border-b-2 border-b-black text-white font-mono text-xs rounded-lg shadow-2xs flex items-center justify-center cursor-pointer"
+                          title="Spasi"
                         >
-                          Spasi
+                          ␣
                         </button>
                         <button
                           type="button"
                           onClick={() => handleVirtualKeyPress('BACKSPACE')}
-                          className="px-3 h-8 bg-white hover:bg-rose-50 active:scale-95 border border-stone-300 text-stone-700 hover:text-rose-600 text-xs rounded-lg shadow-2xs flex items-center justify-center cursor-pointer"
+                          className="px-3.5 h-8 bg-white hover:bg-rose-50 active:translate-y-0.5 border border-stone-300/80 border-b-2 border-b-stone-400/80 text-stone-700 hover:text-rose-600 text-xs rounded-lg shadow-2xs flex items-center justify-center cursor-pointer"
                           title="Hapus"
                         >
                           <Delete className="w-3.5 h-3.5" />
@@ -575,9 +581,10 @@ export const CipherWorkbench: React.FC<CipherWorkbenchProps> = ({
                         <button
                           type="button"
                           onClick={() => handleVirtualKeyPress('CLEAR')}
-                          className="px-3 h-8 bg-stone-200 hover:bg-stone-300 active:scale-95 text-stone-700 text-xs font-medium rounded-lg shadow-2xs flex items-center justify-center cursor-pointer"
+                          className="px-3.5 h-8 bg-stone-200 hover:bg-stone-300 active:translate-y-0.5 border border-stone-300 border-b-2 border-b-stone-400 text-stone-700 text-xs rounded-lg shadow-2xs flex items-center justify-center cursor-pointer"
+                          title="Bersihkan"
                         >
-                          Bersihkan
+                          <RotateCcw className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>

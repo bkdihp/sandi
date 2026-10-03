@@ -277,7 +277,7 @@ export async function renderCipherToCanvas(options: {
   ctx.textAlign = 'right';
   ctx.fillStyle = '#A8A29E';
   ctx.font = '11px monospace';
-  ctx.fillText('sandi.web.app', width - padding, totalHeight - 28);
+  ctx.fillText('sandiko.vercel.app', width - padding, totalHeight - 28);
 
   return canvas;
 }

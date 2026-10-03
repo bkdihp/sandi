@@ -15,30 +15,80 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
 
   // Dynamically get the CURRENT active URL (including hash and query)
-  const activeUrl = typeof window !== 'undefined' ? window.location.href : 'https://sandi-pramuka.web.app';
+  const activeUrl = typeof window !== 'undefined' ? window.location.href : 'https://sandiko.vercel.app';
 
   useEffect(() => {
     if (isOpen && activeUrl) {
-      QRCode.toDataURL(activeUrl, {
-        width: 480,
-        margin: 2,
-        errorCorrectionLevel: 'M',
+      // Create high-res canvas with center logo badge
+      const canvas = document.createElement('canvas');
+      QRCode.toCanvas(canvas, activeUrl, {
+        width: 512,
+        margin: 3,
+        errorCorrectionLevel: 'H',
         color: {
           dark: '#1C1917',
           light: '#FFFFFF',
         },
       })
-        .then((url) => setQrCodeDataUrl(url))
-        .catch((err) => console.error('Gagal membuat QR Code:', err));
+        .then(() => {
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            const size = 512;
+            const logoSize = 110;
+            const logoX = (size - logoSize) / 2;
+            const logoY = (size - logoSize) / 2;
+
+            // Draw clean rounded white badge with subtle border in the center
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.roundRect(logoX - 8, logoY - 8, logoSize + 16, logoSize + 16, 20);
+            ctx.fill();
+            ctx.strokeStyle = '#E7E5E4';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Draw Sandi App Logo
+            const img = new Image();
+            img.src = '/assets/logo-32x32.png';
+            img.onload = () => {
+              ctx.drawImage(img, logoX, logoY, logoSize, logoSize);
+              setQrCodeDataUrl(canvas.toDataURL('image/png'));
+            };
+            img.onerror = () => {
+              // Try fallback to icon.svg or direct data url
+              const fallbackImg = new Image();
+              fallbackImg.src = '/icon.svg';
+              fallbackImg.onload = () => {
+                ctx.drawImage(fallbackImg, logoX, logoY, logoSize, logoSize);
+                setQrCodeDataUrl(canvas.toDataURL('image/png'));
+              };
+              fallbackImg.onerror = () => {
+                setQrCodeDataUrl(canvas.toDataURL('image/png'));
+              };
+            };
+          } else {
+            setQrCodeDataUrl(canvas.toDataURL('image/png'));
+          }
+        })
+        .catch((err) => {
+          console.error('Gagal membuat QR Code:', err);
+          QRCode.toDataURL(activeUrl, {
+            width: 480,
+            margin: 2,
+            errorCorrectionLevel: 'M',
+          })
+            .then((url) => setQrCodeDataUrl(url))
+            .catch(() => {});
+        });
     }
   }, [isOpen, activeUrl]);
 
   if (!isOpen) return null;
 
-  const shareTitle = 'Sandi — Kriptografi & Telegrafi Sandi Pramuka';
+  const shareTitle = '⚜️ Sandi — Kriptografi & Sandi Pramuka';
   const shareText =
-    'Yuk belajar dan pecahkan sandi Pramuka (Morse, Rumput, Kotak, Semafor) dengan aplikasi Sandi! Lengkap dengan simulasi bendera dan audio peluit:';
-  const fullShareMessage = `${shareText}\n${activeUrl}`;
+    '⚜️ *SANDI — Kriptografi & Sandi Pramuka* ⚜️\n\nAplikasi praktis kriptografi & telegrafi lapangan Gerakan Pramuka (Morse, Rumput, Kotak, Semafor) lengkap dengan simulasi bendera & audio peluit!';
+  const fullShareMessage = `⚜️ *SANDI — Kriptografi & Sandi Pramuka* ⚜️\n\nYuk belajar dan pecahkan sandi Pramuka (Morse, Rumput, Kotak, Semafor) dengan simulasi bendera & audio peluit di:\n🔗 ${activeUrl}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(activeUrl);
@@ -77,7 +127,7 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
       try {
         await navigator.share({
           title: shareTitle,
-          text: shareText,
+          text: fullShareMessage,
           url: activeUrl,
         });
       } catch {
@@ -107,7 +157,7 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
           <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.197 1.006.128.832.942z"/>
         </svg>
       ),
-      url: `https://t.me/share/url?url=${encodeURIComponent(activeUrl)}&text=${encodeURIComponent(shareText)}`,
+      url: `https://t.me/share/url?url=${encodeURIComponent(activeUrl)}&text=${encodeURIComponent(fullShareMessage)}`,
     },
     {
       name: 'X',
@@ -138,9 +188,14 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
         <div className="p-4 sm:p-5 border-b border-stone-100 flex items-center justify-between bg-stone-50/80">
           <div className="flex items-center gap-2.5">
             <SandiAppLogo className="w-7 h-7" />
-            <h3 className="text-base font-bold text-stone-900 tracking-tight">
-              Bagikan
-            </h3>
+            <div>
+              <h3 className="text-base font-bold text-stone-900 tracking-tight leading-none">
+                Bagikan Sandi
+              </h3>
+              <p className="text-[11px] text-stone-500 mt-0.5">
+                Kriptografi & Sandi Pramuka
+              </p>
+            </div>
           </div>
           <button
             type="button"
@@ -203,7 +258,7 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
                 {qrCodeDataUrl ? (
                   <img
                     src={qrCodeDataUrl}
-                    alt="QR Code URL Aktif Sandi"
+                    alt="QR Code URL Aktif Sandi dengan Logo"
                     className="w-52 h-52 object-contain rounded-lg"
                   />
                 ) : (
@@ -228,7 +283,7 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
                   type="button"
                   onClick={handleDownloadQr}
                   className="py-2.5 px-3 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
-                  title="Unduh gambar QR Code"
+                  title="Unduh gambar QR Code dengan Logo"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Unduh</span>
@@ -250,6 +305,22 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
           {/* TAB 2: LINK & DIRECT COPY */}
           {activeTab === 'link' && (
             <div className="space-y-3">
+              {/* Card Preview with App Logo */}
+              <div className="p-3 bg-amber-50/70 rounded-2xl border border-amber-200/80 flex items-center gap-3">
+                <SandiAppLogo className="w-12 h-12 shrink-0 drop-shadow-xs" />
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-xs font-bold text-stone-900 truncate">
+                    ⚜️ Sandi — Kriptografi & Sandi Pramuka
+                  </h4>
+                  <p className="text-[11px] text-stone-600 line-clamp-2 mt-0.5 leading-tight">
+                    Morse, Rumput, Kotak & Semafor interaktif dengan audio peluit dan simulasi peraga.
+                  </p>
+                  <span className="text-[10px] font-mono text-amber-800 block mt-1">
+                    sandiko.vercel.app
+                  </span>
+                </div>
+              </div>
+
               <div className="flex items-center gap-2 bg-stone-100 rounded-xl p-1.5 border border-stone-200">
                 <input
                   type="text"
@@ -278,7 +349,7 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
                   className="w-full py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-98"
                 >
                   <Share2 className="w-4 h-4 text-amber-400" />
-                  <span>Bagikan</span>
+                  <span>Bagikan Langsung</span>
                 </button>
               )}
             </div>
@@ -286,19 +357,34 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ isOpen, onCl
 
           {/* TAB 3: MEDIA CHANNELS */}
           {activeTab === 'media' && (
-            <div className="grid grid-cols-2 gap-2.5">
-              {shareChannels.map((channel) => (
-                <a
-                  key={channel.name}
-                  href={channel.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`p-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs active:scale-95 cursor-pointer ${channel.color}`}
-                >
-                  {channel.icon}
-                  <span>{channel.name}</span>
-                </a>
-              ))}
+            <div className="space-y-3">
+              {/* Message format preview */}
+              <div className="p-3 bg-stone-50 rounded-2xl border border-stone-200 flex items-start gap-2.5">
+                <SandiAppLogo className="w-9 h-9 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0 text-[11px] text-stone-700 leading-snug">
+                  <span className="font-bold text-stone-900 block">
+                    ⚜️ SANDI — Kriptografi & Sandi Pramuka ⚜️
+                  </span>
+                  <span className="text-stone-500 block mt-0.5">
+                    Memuat logo aplikasi, deskripsi lengkap, audio peluit morse, dan tautan aktif sandiko.vercel.app saat dibagikan.
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                {shareChannels.map((channel) => (
+                  <a
+                    key={channel.name}
+                    href={channel.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`p-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs active:scale-95 cursor-pointer ${channel.color}`}
+                  >
+                    {channel.icon}
+                    <span>{channel.name}</span>
+                  </a>
+                ))}
+              </div>
             </div>
           )}
         </div>

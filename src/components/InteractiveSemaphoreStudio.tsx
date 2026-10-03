@@ -144,8 +144,8 @@ export const InteractiveSemaphoreStudio: React.FC = () => {
           </div>
 
           {/* SVG Animated Scout Avatar */}
-          <div className="relative w-56 h-56 flex items-center justify-center mt-3">
-            <svg viewBox="0 0 240 240" className="w-full h-full drop-shadow-md">
+          <div className="relative w-full max-w-[280px] sm:max-w-[320px] aspect-square flex items-center justify-center mt-3 overflow-visible">
+            <svg viewBox="-55 -55 350 340" className="w-full h-full overflow-visible drop-shadow-md">
               <defs>
                 <linearGradient id="studioPoleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#D97706" />

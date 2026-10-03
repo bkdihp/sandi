@@ -1,0 +1,33 @@
+{
+  "id": "/",
+  "name": "Sandi - Kriptografi & Sandi Pramuka",
+  "short_name": "Sandi",
+  "description": "Aplikasi interaktif kriptografi dan telegrafi lapangan Gerakan Pramuka: semafor, audio peluit morse, sandi rumput, dan sandi kotak.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#78350F",
+  "background_color": "#FAF9F6",
+  "categories": ["education", "utilities", "entertainment"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

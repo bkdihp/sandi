@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Heart, Code2, ExternalLink, Sparkles, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Heart, Code2, Sparkles, ShieldCheck } from 'lucide-react';
 import { SandiAppLogo, TunasKelapaIcon, WosmFleurIcon } from './ScoutIcons';
 
 interface AboutScreenProps {
@@ -96,20 +96,6 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({ onBack }) => {
             <span>Hak Cipta Terpelihara</span>
           </div>
         </div>
-      </div>
-
-      {/* 3. Small, discreet anchor to original repository */}
-      <div className="text-center text-xs text-stone-400 py-1">
-        <span>Basis awal terinspirasi dari proyek </span>
-        <a
-          href="https://github.com/rbayuokt/kode.in"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1 text-amber-800 hover:text-amber-950 font-medium underline underline-offset-2 transition-colors"
-        >
-          <span>kode.in oleh rbayuokt</span>
-          <ExternalLink className="w-3 h-3 inline" />
-        </a>
       </div>
 
       {/* Return to Home CTA */}

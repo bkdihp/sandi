@@ -12,14 +12,17 @@ import {
   BenderaSemaforIcon,
   BukuSakuIcon,
 } from './components/ScoutIcons';
-import { Info, Gamepad2, Maximize2 } from 'lucide-react';
+import { Info, Gamepad2, Maximize2, Share2 } from 'lucide-react';
 import { InteractiveMediaArena } from './components/InteractiveMediaArena';
+import { PWAInstallButton } from './components/PWAInstallButton';
+import { SocialShareModal } from './components/SocialShareModal';
 
 export type Screen = 'home' | CipherType | 'about' | 'game' | 'dictionary';
 
 export const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [isDictionaryOpen, setIsDictionaryOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [workbenchInitialText, setWorkbenchInitialText] = useState<string | undefined>(undefined);
 
   // Sync with browser history for back/forward buttons
@@ -149,8 +152,20 @@ export const App: React.FC = () => {
             </button>
           </nav>
 
-          {/* Zone 3: Fullscreen & About */}
-          <div className="flex items-center gap-2.5">
+          {/* Zone 3: Fullscreen, PWA Install, Social Share & About */}
+          <div className="flex items-center gap-2">
+            <PWAInstallButton />
+
+            <button
+              type="button"
+              onClick={() => setIsShareModalOpen(true)}
+              className="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300/80 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
+              title="Bagikan Aplikasi ke Media Sosial"
+            >
+              <Share2 className="w-3.5 h-3.5 text-amber-800" />
+              <span className="hidden sm:inline">Bagikan</span>
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -160,20 +175,11 @@ export const App: React.FC = () => {
                   document.exitFullscreen().catch(() => {});
                 }
               }}
-              className="px-2.5 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold border border-stone-300 transition-colors hidden sm:flex items-center gap-1.5 cursor-pointer"
+              className="px-2.5 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold border border-stone-300 transition-colors hidden md:flex items-center gap-1.5 cursor-pointer"
               title="Tampilkan Layar Penuh"
             >
               <Maximize2 className="w-3.5 h-3.5 text-stone-600" />
               <span className="hidden lg:inline">Layar Penuh</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigateTo('dictionary')}
-              className="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-semibold border border-amber-200/80 transition-colors flex items-center gap-1.5 shadow-2xs cursor-pointer md:hidden"
-            >
-              <BukuSakuIcon className="w-4 h-4 text-amber-800" />
-              <span>Kamus</span>
             </button>
 
             <button
@@ -203,6 +209,7 @@ export const App: React.FC = () => {
                 navigateTo(screen as Screen);
               }
             }}
+            onOpenShare={() => setIsShareModalOpen(true)}
           />
         )}
 
@@ -327,6 +334,12 @@ export const App: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* 5. Modal: Bagikan Aplikasi ke Media Sosial */}
+      <SocialShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+      />
     </div>
   );
 };

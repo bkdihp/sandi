@@ -4,6 +4,7 @@ import {
   Volume2,
   ChevronRight,
   BookOpen,
+  Share2,
 } from 'lucide-react';
 import {
   SandiAppLogo,
@@ -16,12 +17,14 @@ import {
   KompasBidikIcon,
   BukuSakuIcon,
 } from './ScoutIcons';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface HomeScreenProps {
   onNavigate: (screen: 'morse' | 'rumput' | 'kotak' | 'semafor' | 'about' | 'dictionary' | 'game') => void;
+  onOpenShare?: () => void;
 }
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
+export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, onOpenShare }) => {
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
@@ -87,10 +90,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
               <BukuSakuIcon className="w-4 h-4 text-amber-400" />
               <span>Kamus Sandi</span>
             </button>
+            <PWAInstallButton variant="hero" />
+
+            {onOpenShare && (
+              <button
+                type="button"
+                onClick={onOpenShare}
+                className="px-4 py-3.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-sm font-bold border border-amber-500/40 transition-all flex items-center gap-2 cursor-pointer"
+                title="Bagikan Aplikasi ke Media Sosial"
+              >
+                <Share2 className="w-4 h-4 text-amber-300" />
+                <span>Bagikan App</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={toggleFullscreen}
-              className="px-4 py-3.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs sm:text-sm font-bold border border-amber-500/40 transition-all flex items-center gap-1.5 cursor-pointer ml-auto"
+              className="px-4 py-3.5 rounded-2xl bg-stone-800/80 hover:bg-stone-700/80 text-stone-300 text-xs sm:text-sm font-bold border border-stone-700 transition-all flex items-center gap-1.5 cursor-pointer ml-auto"
               title="Tampilkan Layar Penuh"
             >
               <span>Layar Penuh</span>

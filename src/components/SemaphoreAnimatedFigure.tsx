@@ -8,6 +8,13 @@ import {
   Gauge,
   Sliders,
   RefreshCw,
+  Maximize2,
+  Minimize2,
+  Repeat,
+  Repeat1,
+  CircleDot,
+  Check,
+  CheckCheck,
 } from 'lucide-react';
 import {
   getSemaphorePose,
@@ -28,19 +35,32 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
   compact = false,
 }) => {
   // Normalize characters from input (A-Z, 0-9, and spaces)
+  // Aturan Isyarat Semafor Lapangan:
+  // Selalu diawali dengan posisi bersiap/istirahat (spasi) dan diakhiri dengan posisi istirahat (spasi).
+  // Hal ini memastikan bendera tidak terus tergantung di atas saat kata selesai (misal huruf terakhir U).
   const sequence = useMemo(() => {
     const raw = (text && text.trim() ? text : 'PRAMUKA').toUpperCase();
     const cleaned = raw.replace(/[^A-Z0-9\s]/g, '');
     const tokens = cleaned.length > 0 ? cleaned.split('') : ['P', 'R', 'A', 'M', 'U', 'K', 'A'];
-    // Merge consecutive spaces into single space
-    return tokens.filter((ch, i, arr) => !(ch === ' ' && arr[i - 1] === ' '));
+    // Gabungkan spasi berturut-turut menjadi satu spasi
+    const merged = tokens.filter((ch, i, arr) => !(ch === ' ' && arr[i - 1] === ' '));
+    // Buang spasi di awal atau akhir jika pengguna mengetik spasi berlebih
+    while (merged.length > 0 && merged[0] === ' ') merged.shift();
+    while (merged.length > 0 && merged[merged.length - 1] === ' ') merged.pop();
+
+    // Selalu pastikan diawali dan diakhiri dengan posisi istirahat / spasi (' ')
+    return [' ', ...merged, ' '];
   }, [text]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLooping, setIsLooping] = useState(false); // Default false: stop at last letter
   const [speedMs, setSpeedMs] = useState<number>(1000); // 1000ms default
   const [viewPerspective, setViewPerspective] = useState<'front' | 'back'>('front');
   const [showSpeedSlider, setShowSpeedSlider] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const containerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number | null>(null);
 
   // Sync index if sequence length drops
@@ -50,7 +70,7 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
     }
   }, [sequence, currentIndex]);
 
-  // Animation playback interval
+  // Animation playback interval: stops at last letter (posisi istirahat) if isLooping is false!
   useEffect(() => {
     if (!isPlaying) {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -60,7 +80,12 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
     timerRef.current = window.setInterval(() => {
       setCurrentIndex((prev) => {
         if (prev + 1 >= sequence.length) {
-          return 0; // Seamless loop
+          if (isLooping) {
+            return 0; // Seamless loop kembali ke posisi bersiap
+          } else {
+            setIsPlaying(false);
+            return prev; // Berhenti dengan tenang pada posisi istirahat akhir!
+          }
         }
         return prev + 1;
       });
@@ -69,7 +94,36 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isPlaying, speedMs, sequence.length]);
+  }, [isPlaying, isLooping, speedMs, sequence.length]);
+
+  // Sync with document fullscreenchange
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, [isFullscreen]);
+
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      setIsFullscreen(true);
+      if (containerRef.current && containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen().catch(() => {});
+      }
+    } else {
+      setIsFullscreen(false);
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+  };
+
+  const isStartIndex = currentIndex === 0;
+  const isEndIndex = currentIndex === sequence.length - 1;
+  const isAtLastCharacter = currentIndex >= sequence.length - 1;
 
   const currentChar = sequence[currentIndex] || ' ';
   const currentPose: SemaphorePose = currentChar === ' ' ? REST_POSE : getSemaphorePose(currentChar);
@@ -79,7 +133,15 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
   const armTransitionMs = Math.max(180, Math.min(speedMs * 0.45, 340));
 
   const handleTogglePlay = () => {
-    setIsPlaying((prev) => !prev);
+    if (isPlaying) {
+      setIsPlaying(false);
+    } else {
+      // Jika sudah di karakter akhir, mulai putar kembali dari awal (posisi siap)
+      if (isAtLastCharacter && !isLooping) {
+        setCurrentIndex(0);
+      }
+      setIsPlaying(true);
+    }
   };
 
   const handleReset = () => {
@@ -119,22 +181,49 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
   };
 
   return (
-    <div className={`bg-stone-900 text-stone-100 rounded-2xl border border-stone-800 p-4 sm:p-5 select-none shadow-sm ${className}`}>
+    <div
+      ref={containerRef}
+      className={`bg-stone-900 text-stone-100 rounded-2xl border border-stone-800 p-4 sm:p-5 select-none shadow-sm transition-all ${
+        isFullscreen
+          ? 'fixed inset-0 z-50 rounded-none border-0 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto bg-stone-950'
+          : className
+      }`}
+    >
       {/* 1. Header Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-stone-800">
         <div className="flex items-center gap-2.5">
           <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
           <h3 className="text-sm font-bold text-stone-100 tracking-tight">
-            Simulasi Semafor
+            Simulasi Isyarat Semafor
           </h3>
           <span className="text-xs text-stone-400 font-mono">
             {currentIndex + 1}/{sequence.length}
           </span>
+          {isAtLastCharacter && !isPlaying && !isLooping && (
+            <span className="text-[10px] font-bold uppercase bg-amber-950/80 text-amber-400 border border-amber-800/80 px-2 py-0.5 rounded-md">
+              Selesai
+            </span>
+          )}
         </div>
 
-        {/* View Perspective & Speed Bar */}
-        <div className="flex items-center gap-2">
-          {/* Flip Model Button */}
+        {/* View Perspective, Loop Switch & Speed Bar */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Loop / Replay Switch */}
+          <button
+            type="button"
+            onClick={() => setIsLooping((l) => !l)}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border ${
+              isLooping
+                ? 'bg-amber-600/30 border-amber-500 text-amber-300 font-bold'
+                : 'bg-stone-800/80 border-stone-700 text-stone-400 hover:text-stone-200'
+            }`}
+            title={isLooping ? 'Putar Berulang: Aktif (Loop terus menerus)' : 'Putar 1 Kali (Berhenti di huruf terakhir)'}
+          >
+            {isLooping ? <Repeat className="w-3.5 h-3.5 text-amber-400" /> : <Repeat1 className="w-3.5 h-3.5 text-stone-400" />}
+            <span>{isLooping ? 'Loop: Aktif' : 'Loop: Mati (1x)'}</span>
+          </button>
+
+          {/* Flip Perspective Button */}
           <button
             type="button"
             onClick={handleToggleView}
@@ -177,6 +266,16 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
               <Sliders className="w-3 h-3" />
             </button>
           </div>
+
+          {/* Fullscreen Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-300 hover:text-white transition-all cursor-pointer"
+            title={isFullscreen ? 'Keluar dari Layar Penuh' : 'Tampilkan Layar Penuh'}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4 text-amber-400" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
         </div>
       </div>
 
@@ -199,26 +298,31 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
         </div>
       )}
 
-      {/* 2. Main Avatar Arena */}
-      <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-12'} gap-4 items-center py-3.5`}>
+      {/* 2. Main Avatar Arena (Expansive Unclipped ViewBox) */}
+      <div className={`grid ${compact && !isFullscreen ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-12'} gap-4 sm:gap-6 items-center py-3.5 flex-1`}>
         {/* Left Column: Natural Animated Scout Vector Stage */}
-        <div className={`${compact ? 'col-span-1' : 'sm:col-span-7'} flex flex-col items-center justify-center bg-stone-950/80 rounded-2xl p-4 border border-stone-800/80 relative min-h-[250px]`}>
-          {/* Subtle Perspective Label */}
+        <div className={`${compact && !isFullscreen ? 'col-span-1' : 'sm:col-span-7'} flex flex-col items-center justify-center bg-stone-950/80 rounded-2xl p-4 sm:p-6 border border-stone-800/80 relative min-h-[280px] sm:min-h-[340px] overflow-visible`}>
+          {/* Perspective Label */}
           <div className="absolute top-2.5 left-3 text-[11px] font-mono text-stone-500">
             {viewPerspective === 'front' ? 'Sudut Audiens (Penerima)' : 'Sudut Pengirim (Latihan)'}
           </div>
 
-          <div className="relative w-52 h-52 sm:w-56 sm:h-56 flex items-center justify-center mt-2">
-            <svg viewBox="0 0 240 240" className="w-full h-full drop-shadow-lg">
+          {/* SVG Container: generous breathing room with overflow-visible to prevent any flag clipping */}
+          <div className="relative w-full max-w-[280px] sm:max-w-[340px] aspect-square flex items-center justify-center mt-2 overflow-visible">
+            {/* ViewBox enlarged to -55 -55 350 340 so 360° swings never touch bounds */}
+            <svg
+              viewBox="-55 -55 350 340"
+              className="w-full h-full overflow-visible drop-shadow-xl"
+            >
               <defs>
-                {/* Red/Yellow Flag Gradient */}
+                {/* Flag Staff Wood Gradient */}
                 <linearGradient id="flagPoleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#D97706" />
                   <stop offset="50%" stopColor="#F59E0B" />
                   <stop offset="100%" stopColor="#B45309" />
                 </linearGradient>
-                <filter id="shadowFilter" x="-10%" y="-10%" width="120%" height="120%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.4" />
+                <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#000" floodOpacity="0.45" />
                 </filter>
               </defs>
 
@@ -412,18 +516,34 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
         </div>
 
         {/* Right Column: Active Pose Details & Playback Controls */}
-        <div className={`${compact ? 'col-span-1' : 'sm:col-span-5'} flex flex-col justify-between space-y-3`}>
+        <div className={`${compact && !isFullscreen ? 'col-span-1' : 'sm:col-span-5'} flex flex-col justify-between space-y-3`}>
           <div>
             <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-red-600 text-white font-mono font-black text-3xl flex items-center justify-center shadow-xs border border-red-500/50">
-                {currentChar === ' ' ? '⎵' : currentChar}
+              <div className="w-14 h-14 rounded-2xl bg-red-600 text-white font-mono font-black flex items-center justify-center shadow-xs border border-red-500/50">
+                {isStartIndex ? (
+                  <CircleDot className="w-7 h-7 text-amber-300" />
+                ) : isEndIndex ? (
+                  <CheckCheck className="w-7 h-7 text-emerald-300" />
+                ) : currentChar === ' ' ? (
+                  <span className="text-2xl text-stone-200">␣</span>
+                ) : (
+                  <span className="text-3xl">{currentChar}</span>
+                )}
               </div>
               <div>
                 <span className="text-xs uppercase tracking-wider text-red-400 font-bold block">
-                  {currentChar === ' ' ? 'Posisi Siap' : `Huruf ${currentChar}`}
+                  {isStartIndex
+                    ? 'Posisi Bersiap (Istirahat)'
+                    : isEndIndex
+                    ? 'Posisi Selesai (Istirahat)'
+                    : currentChar === ' '
+                    ? 'Pemisah Kata (Spasi)'
+                    : `Huruf ${currentChar}`}
                 </span>
                 <span className="text-xs text-stone-300 font-mono">
-                  {currentPose.kunciName}
+                  {isStartIndex || isEndIndex
+                    ? 'Kunci 0 (Istirahat Sempurna)'
+                    : currentPose.kunciName}
                 </span>
               </div>
             </div>
@@ -436,7 +556,11 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
                 </span>
               </div>
               <p className="text-[11px] text-stone-400 leading-snug">
-                {currentPose.desc}
+                {isStartIndex
+                  ? 'Sebelum pengiriman sandi dimulai, kedua bendera disilangkan di depan kaki (posisi istirahat).'
+                  : isEndIndex
+                  ? 'Pengiriman sandi selesai, kedua bendera kembali diturunkan menyilang di depan kaki.'
+                  : currentPose.desc}
               </p>
             </div>
           </div>
@@ -446,7 +570,7 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
             <button
               type="button"
               onClick={handleTogglePlay}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs ${
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs ${
                 isPlaying
                   ? 'bg-amber-600 hover:bg-amber-700 text-white'
                   : 'bg-red-600 hover:bg-red-700 text-white'
@@ -460,7 +584,7 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
               ) : (
                 <>
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Putar Gerakan</span>
+                  <span>{isAtLastCharacter && !isLooping ? 'Putar dari Awal' : 'Putar Gerakan'}</span>
                 </>
               )}
             </button>
@@ -468,7 +592,7 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
             <button
               type="button"
               onClick={handleStepPrev}
-              className="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors cursor-pointer"
+              className="p-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors cursor-pointer"
               title="Karakter Sebelumnya"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -477,7 +601,7 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
             <button
               type="button"
               onClick={handleStepNext}
-              className="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors cursor-pointer"
+              className="p-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors cursor-pointer"
               title="Karakter Berikutnya"
             >
               <ChevronRight className="w-4 h-4" />
@@ -486,8 +610,8 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
             <button
               type="button"
               onClick={handleReset}
-              className="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-200 transition-colors cursor-pointer"
-              title="Ulangi dari Awal"
+              className="p-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-200 transition-colors cursor-pointer"
+              title="Ulangi dari Awal (Posisi Bersiap)"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -500,6 +624,9 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {sequence.map((char, idx) => {
             const isActive = idx === currentIndex;
+            const isStart = idx === 0;
+            const isEnd = idx === sequence.length - 1;
+
             return (
               <button
                 key={`${char}-${idx}`}
@@ -508,14 +635,32 @@ export const SemaphoreAnimatedFigure: React.FC<SemaphoreAnimatedFigureProps> = (
                   setIsPlaying(false);
                   setCurrentIndex(idx);
                 }}
-                className={`min-w-[30px] h-8 px-2 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-8 h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                   isActive
                     ? 'bg-red-600 text-white shadow-xs scale-105 ring-2 ring-red-400'
+                    : isStart || isEnd
+                    ? 'bg-stone-800 text-amber-300 border border-amber-600/40 hover:bg-stone-700'
                     : 'bg-stone-800/70 hover:bg-stone-700 text-stone-300'
                 }`}
-                title={`Lihat formasi '${char}'`}
+                title={
+                  isStart
+                    ? 'Posisi Bersiap (Istirahat Awal)'
+                    : isEnd
+                    ? 'Posisi Selesai (Istirahat Akhir)'
+                    : char === ' '
+                    ? 'Spasi Antar Kata'
+                    : `Lihat formasi '${char}'`
+                }
               >
-                {char === ' ' ? '⎵' : char}
+                {isStart ? (
+                  <CircleDot className="w-3.5 h-3.5 text-amber-300" />
+                ) : isEnd ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-300" />
+                ) : char === ' ' ? (
+                  <span className="text-stone-400">␣</span>
+                ) : (
+                  char
+                )}
               </button>
             );
           })}

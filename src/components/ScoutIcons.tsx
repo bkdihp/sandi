@@ -7,11 +7,11 @@ interface ScoutIconProps {
 
 /**
  * Logo Resmi Aplikasi Sandi:
- * Kombinasi Siluet Tunas Kelapa Pramuka + Sandi Rumput + Bendera Semafor
+ * Siluet Peluit Morse Hitam & Tunas Kelapa Emas (sandiko)
  */
 export const SandiAppLogo: React.FC<ScoutIconProps> = ({ className = 'w-8 h-8', size }) => (
   <img
-    src="/assets/logo.svg"
+    src="/assets/logo.png"
     alt="Logo Sandi Pramuka"
     className={`${className} object-contain shrink-0`}
     style={size ? { width: size, height: size } : undefined}
